@@ -1,0 +1,2786 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard AGT Bending Process</title>
+  
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    /* ========== Global Styles ========== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a1a;
+      padding: 20px;
+      font-size: 15px;
+    }
+
+    h1 {
+      font-size: 23px;
+      font-weight: 700;
+      margin-bottom: 3px;
+      color: #1F4E79;
+    }
+
+    .sub {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 18px;
+    }
+
+    /* ========== Setup Banner ========== */
+    #setupBanner {
+      background: #fffbe6;
+      border: 1px solid #f5c518;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 18px;
+      display: none;
+    }
+
+    #setupBanner h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #856404;
+      margin-bottom: 8px;
+    }
+
+    #setupBanner p {
+      font-size: 13px;
+      color: #664d03;
+      line-height: 1.9;
+      margin-bottom: 10px;
+    }
+
+    #setupBanner code {
+      background: #f5e9a0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      display: block;
+      white-space: pre-wrap;
+      margin: 6px 0;
+      padding: 8px 10px;
+      border: 1px solid #e5c000;
+    }
+
+    #urlInput {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .btn-save {
+      background: #185FA5;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+
+    .btn-save:hover {
+      background: #0c447c;
+    }
+
+    /* ========== Status Bar ========== */
+    #statusBar {
+      font-size: 13px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .err {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .warn {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-info { background: #3b82f6; }
+    .dot-ok { background: #22c55e; }
+    .dot-err { background: #ef4444; }
+    .dot-warn { background: #eab308; }
+
+    /* ========== Top Bar & Buttons ========== */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: #1F4E79;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: #163a5c;
+    }
+
+    .btn-sm {
+      background: #fff;
+      color: #1F4E79;
+      border: 1px solid #1F4E79;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-sm:hover {
+      background: #eef4fb;
+    }
+
+    .btn-pdf {
+      background: #C0392B;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-pdf:hover {
+      background: #a93226;
+    }
+
+    .btn-pdf:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .ts {
+      font-size: 15px;
+      color: #555;
+      font-weight: 600;
+    }
+
+    /* ========== Tabs ========== */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      color: #888;
+      border: 1px solid transparent;
+      border-bottom: none;
+      background: transparent;
+      margin-bottom: -2px;
+    }
+
+    .tab.active {
+      color: #1F4E79;
+      background: #fff;
+      border-color: #e5e7eb;
+      border-bottom-color: #fff;
+    }
+
+    .tab:hover:not(.active) {
+      color: #1F4E79;
+      background: #f0f4f8;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* ========== KPI Grid ========== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .kpi {
+      background: #fff;
+      border-radius: 12px;
+      padding: 15px 17px;
+      border: 1px solid #e5e7eb;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      border-radius: 12px 0 0 12px;
+    }
+
+    .kpi.green::before { background: #1D9E75; }
+    .kpi.red::before { background: #E24B4A; }
+    .kpi.blue::before { background: #185FA5; }
+    .kpi.amber::before { background: #BA7517; }
+    .kpi.purple::before { background: #7C3AED; }
+    .kpi.teal::before { background: #0891B2; }
+
+    .kpi-lbl {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 7px;
+      font-weight: 500;
+    }
+
+    .kpi-val {
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+
+    .kpi.green .kpi-val { color: #1D9E75; }
+    .kpi.red .kpi-val { color: #E24B4A; }
+    .kpi.blue .kpi-val { color: #185FA5; }
+    .kpi.amber .kpi-val { color: #BA7517; }
+    .kpi.purple .kpi-val { color: #7C3AED; }
+    .kpi.teal .kpi-val { color: #0891B2; }
+
+    .kpi-unit {
+      font-size: 12px;
+      color: #bbb;
+    }
+
+    /* ========== Cards ========== */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 3px;
+    }
+
+    .card-sub {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 14px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      margin-bottom: 12px;
+    }
+
+    .li {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .ld {
+      width: 11px;
+      height: 11px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .charts-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ========== Tables ========== */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead tr {
+      background: #f8fafc;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 600;
+      font-size: 12px;
+      color: #666;
+      border-bottom: 1px solid #e5e7eb;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #f3f4f6;
+      color: #333;
+      vertical-align: middle;
+    }
+
+    .tbl-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 16px;
+    }
+
+    tr:hover td {
+      background: #fafbfc;
+    }
+
+    tr.total-row td {
+      font-weight: 700;
+      background: #f8fafc;
+      border-top: 2px solid #e5e7eb;
+    }
+
+    .num {
+      text-align: right;
+    }
+
+    /* ========== Section Labels ========== */
+    .section-lbl {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1F4E79;
+      margin: 20px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .section-lbl::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e5e7eb;
+    }
+
+    /* ========== Badges ========== */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .b-fa { background: #dcfce7; color: #166534; }
+    .b-bending { background: #dbeafe; color: #1e40af; }
+    .b-wait { background: #fef3c7; color: #92400e; }
+    .b-pause { background: #fee2e2; color: #991b1b; }
+    .b-gray { background: #f3f4f6; color: #555; }
+    .b-ready { background: #dcfce7; color: #166534; }
+    .b-not-ready { background: #f3f4f6; color: #888; }
+
+    /* ========== Progress Bar ========== */
+    .prog-bar {
+      height: 6px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .prog-fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ===== Header ===== -->
+<h1>🏭 Dashboard – แผนการผลิตงานพับ AGT</h1>
+<p class="sub" id="pageSubtitle">กำลังโหลดข้อมูล...</p>
+
+<!-- ===== Setup Banner ===== -->
+<div id="setupBanner">
+  <h3>⚙️ ตั้งค่า Apps Script URL (ทำครั้งเดียว)</h3>
+  <p>1. เปิด Google Sheet → <b>ส่วนขยาย → Apps Script</b><br>
+  2. วางโค้ดนี้แทนโค้ดเดิมทั้งหมด แล้วกด Save:</p>
+  <code>function doGet(e) {
+  const ss = SpreadsheetApp.openById('1go8pzPAR3FCuQVULSfnZjoMhRkektjwFmyAkqYCmEVM');
+  const name = e.parameter.sheet;
+  const sheet = name ? ss.getSheetByName(name) : ss.getSheets()[0];
+  const out = sheet
+    ? ContentService.createTextOutput(JSON.stringify(sheet.getDataRange().getValues()))
+    : ContentService.createTextOutput(JSON.stringify({error:'not found: '+name}));
+  out.setMimeType(ContentService.MimeType.JSON);
+  return out;
+}</code>
+  <p>3. <b>Deploy → New deployment → Web app</b><br>
+  &nbsp;&nbsp;&nbsp;Execute as: <b>Me</b> · Who has access: <b>Anyone</b><br>
+  4. คัดลอก URL แล้ววางด้านล่าง:</p>
+  <input type="text" id="urlInput" placeholder="https://script.google.com/macros/s/.../exec">
+  <button class="btn-save" onclick="saveUrl()">💾 บันทึกและโหลด</button>
+  <button class="btn-save" style="background:#888" onclick="document.getElementById('setupBanner').style.display='none'">ปิด</button>
+</div>
+
+<!-- ===== DB Backup Banner ===== -->
+<div id="dbBanner" style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:16px 20px;margin-bottom:18px;display:none">
+  <h3 style="font-size:15px;font-weight:700;color:#166534;margin-bottom:8px">🗄️ ตั้งค่า URL สำหรับบันทึกฐานข้อมูล (ทำครั้งเดียว)</h3>
+  <p style="font-size:13px;color:#14532d;line-height:1.9;margin-bottom:10px">
+    ใช้ Apps Script เดิม <b>หรือ Deploy ใหม่</b> โดยเพิ่ม <code style="background:#bbf7d0;padding:2px 6px;border-radius:4px">doPost</code> ด้านล่างนี้ลงใน script เดิม:
+  </p>
+  <code style="background:#dcfce7;padding:8px 10px;border-radius:6px;font-size:12px;display:block;white-space:pre-wrap;border:1px solid #86efac;margin-bottom:10px">function doPost(e) {
+  try {
+    const payload = JSON.parse(e.postData.contents);
+    const ss = SpreadsheetApp.openById('1go8pzPAR3FCuQVULSfnZjoMhRkektjwFmyAkqYCmEVM');
+    let sheet = ss.getSheetByName(payload.sheet);
+    if (!sheet) sheet = ss.insertSheet(payload.sheet);
+    const rows = payload.rows;
+    if (rows && rows.length > 0) {
+      const maxCols = Math.max(...rows.map(r => r.length));
+      const normalized = rows.map(r => {
+        while (r.length < maxCols) r.push('');
+        return r;
+      });
+      sheet.getRange(sheet.getLastRow() + 1, 1, normalized.length, maxCols).setValues(normalized);
+    }
+    return ContentService.createTextOutput(JSON.stringify({ok:true}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ok:false, error:err.message}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}</code>
+  <p style="font-size:13px;color:#14532d;margin-bottom:10px">
+    จากนั้น <b>Deploy → New deployment → Web app</b><br>
+    &nbsp;&nbsp;Execute as: <b>Me</b> · Who has access: <b>Anyone</b><br>
+    วาง URL ด้านล่าง (ใช้ URL เดิมได้ถ้า script เดิมมี doPost แล้ว):
+  </p>
+  <input type="text" id="dbUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
+    style="width:100%;padding:9px 12px;border:1px solid #86efac;border-radius:8px;font-size:14px;margin-bottom:10px">
+  <button onclick="saveDbUrl()" style="background:#166534;color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:14px;cursor:pointer;margin-right:8px">💾 บันทึก DB URL</button>
+  <button onclick="document.getElementById('dbBanner').style.display='none'" style="background:#888;color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:14px;cursor:pointer">ปิด</button>
+</div>
+
+<!-- ===== Top Bar ===== -->
+<div class="topbar">
+  <button class="btn" onclick="loadAll()">↻ รีเฟรชทั้งหมด</button>
+  <button class="btn-sm" onclick="showSetup()">⚙️ ตั้งค่า URL</button>
+  <button class="btn-sm" onclick="showDbSetup()" id="dbSetupBtn" style="color:#166534;border-color:#86efac">🗄️ ตั้งค่า DB</button>
+  <button class="btn-sm" onclick="manualSaveToDB()" id="dbSaveBtn" style="color:#166534;border-color:#86efac;display:none">💾 บันทึก DB</button>
+  <button class="btn-pdf" onclick="exportPDF()" id="pdfBtn">📄 โหลด PDF</button>
+  
+  <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#555;cursor:pointer;user-select:none">
+    <input type="checkbox" id="autoChk" onchange="toggleAuto()" style="width:15px;height:15px;cursor:pointer">
+    รีเฟรชอัตโนมัติ
+  </label>
+  
+  <select id="intervalSel" onchange="changeInterval()" style="font-size:12px;border:1px solid #ccc;border-radius:6px;padding:4px 8px;color:#555;display:none">
+    <option value="30">ทุก 30 วินาที</option>
+    <option value="60" selected>ทุก 1 นาที</option>
+    <option value="120">ทุก 2 นาที</option>
+    <option value="300">ทุก 5 นาที</option>
+  </select>
+  
+  <span id="countdownBadge" style="display:none;font-size:11px;background:#dbeafe;color:#1e40af;padding:3px 10px;border-radius:99px"></span>
+  <button class="btn-sm" onclick="toggleSnapshotPanel()" id="snapshotBtn" style="color:#7C3AED;border-color:#c4b5fd">📅 ประวัติ snapshot</button>
+  <span class="ts" id="ts"></span>
+  <span class="ts" id="cacheInfo" style="color:#1D9E75;font-weight:600"></span>
+  <span id="dbStatusEl" style="font-size:11px;color:#166534;font-weight:600"></span>
+</div>
+
+<!-- ===== Snapshot History Panel ===== -->
+<div id="snapshotPanel" style="display:none;background:#fff;border:1px solid #c4b5fd;border-radius:10px;padding:16px 20px;margin-bottom:14px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <h3 style="font-size:14px;font-weight:700;color:#7C3AED">📅 ประวัติ Snapshot รายเดือน</h3>
+    <span style="font-size:11px;color:#888">บันทึกอัตโนมัติทุกครั้งที่รีเฟรช · เก็บสูงสุด 24 เดือน</span>
+  </div>
+  <div id="snapshotList" style="max-height:260px;overflow-y:auto"></div>
+  <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+    <button onclick="loadAll()" style="font-size:12px;padding:5px 14px;background:#dbeafe;border:1px solid #93c5fd;border-radius:6px;cursor:pointer;color:#1e40af">↻ โหลดข้อมูลล่าสุดจากชีต</button>
+    <button onclick="exportSnapshotFile()" style="font-size:12px;padding:5px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;cursor:pointer;color:#166534">⬇️ ดาวน์โหลดประวัติ (ย้ายเครื่องใหม่)</button>
+    <button onclick="document.getElementById('importSnapshotInput').click()" style="font-size:12px;padding:5px 14px;background:#fff7ed;border:1px solid #fdba74;border-radius:6px;cursor:pointer;color:#9a3412">⬆️ นำเข้าประวัติ</button>
+    <input type="file" id="importSnapshotInput" accept="application/json" style="display:none" onchange="importSnapshotFile(this.files[0])">
+    <button onclick="if(confirm('ลบประวัติ snapshot ทั้งหมด?')){localStorage.removeItem(DAILY_STORE_KEY);updateSnapshotUI();}" style="font-size:12px;padding:5px 14px;background:#fff0f0;border:1px solid #fca5a5;border-radius:6px;cursor:pointer;color:#E24B4A">🗑 ลบประวัติทั้งหมด</button>
+  </div>
+  <p style="font-size:11px;color:#aaa;margin-top:8px">💡 ย้ายประวัติไปเครื่องใหม่: กด "ดาวน์โหลดประวัติ" ที่เครื่องเดิม → ส่งไฟล์ไปเครื่องใหม่ → เปิดเว็บที่เครื่องใหม่แล้วกด "นำเข้าประวัติ"</p>
+
+  </div>
+</div>
+
+<!-- ===== Validate Log ===== -->
+<div id="validateLog" style="display:none;background:#fff8e1;border:1px solid #fde68a;border-radius:8px;padding:8px 14px;margin-bottom:10px;font-size:12px;color:#92400e"></div>
+
+<!-- ===== Status Bar ===== -->
+<div id="statusBar" class="info">
+  <span class="dot dot-info"></span>
+  <span id="statusMsg">กำลังดึงข้อมูล...</span>
+</div>
+
+<!-- ===== Tabs ===== -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('plan')">📋 แผนการผลิต</button>
+  <button class="tab" onclick="switchTab('fg')">📦 Finished Good</button>
+  <button class="tab" onclick="switchTab('fix')">🔧 สต๊อกงานแก้ไข</button>
+</div>
+
+<!-- ===== TAB: แผนการผลิต ===== -->
+<div class="tab-panel active" id="tab-plan">
+
+  <!-- KPI Grid -->
+  <div class="kpi-grid">
+    <div class="kpi blue">
+      <p class="kpi-lbl">รายการทั้งหมด</p>
+      <p class="kpi-val" id="pk1">–</p>
+      <p class="kpi-unit">รายการ</p>
+    </div>
+    <div class="kpi green">
+      <p class="kpi-lbl">กำลังพับ</p>
+      <p class="kpi-val" id="pk2">–</p>
+      <p class="kpi-unit">รายการ</p>
+    </div>
+    <div class="kpi amber">
+      <p class="kpi-lbl">รอพับ</p>
+      <p class="kpi-val" id="pk3">–</p>
+      <p class="kpi-unit">รายการ</p>
+    </div>
+    <div class="kpi red">
+      <p class="kpi-lbl">หยุดชั่วคราว</p>
+      <p class="kpi-val" id="pk4">–</p>
+      <p class="kpi-unit">รายการ</p>
+    </div>
+    <div class="kpi purple">
+      <p class="kpi-lbl">ยอดรวม (EA.)</p>
+      <p class="kpi-val" id="pk5">–</p>
+      <p class="kpi-unit">EA.</p>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="charts-row">
+    <div class="card">
+      <p class="card-title">จำนวนงานรายชิ้น (EA.)</p>
+      <p class="card-sub">ปริมาณแต่ละรายการในแผนผลิตปัจจุบัน</p>
+      <div style="position:relative;width:100%;height:260px">
+        <canvas id="barChart" role="img" aria-label="กราฟแท่งจำนวนงานรายชิ้น">จำนวนงานรายชิ้น</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <p class="card-title">สัดส่วนสถานะงาน</p>
+      <p class="card-sub">จำนวนรายการแยกตามสถานะ</p>
+      <div class="legend" id="statusLeg"></div>
+      <div style="position:relative;width:100%;height:200px">
+        <canvas id="statusPie" role="img" aria-label="กราฟวงกลมสถานะงาน">สัดส่วนสถานะ</canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Planning Table -->
+  <div class="section-lbl">📋 รายละเอียดแผนการผลิต</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Part Name</th>
+          <th>Dwg.</th>
+          <th class="num">จำนวน</th>
+          <th>อัพเดท</th>
+          <th>สถานะ</th>
+          <th>เครื่องพับ</th>
+          <th>วันเริ่ม</th>
+          <th>วันคาดเสร็จ</th>
+          <th>หมายเหตุ</th>
+          <th>วันรับเข้า</th>
+        </tr>
+      </thead>
+      <tbody id="planTbl">
+        <tr><td colspan="11" style="text-align:center;color:#aaa;padding:20px">กำลังโหลด...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Machine Summary Table -->
+  <div class="section-lbl">🔧 สรุปงานรายเครื่องพับ</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>เครื่องพับ</th>
+          <th class="num">รายการ</th>
+          <th class="num">ยอดรวม (EA.)</th>
+          <th>สัดส่วน</th>
+        </tr>
+      </thead>
+      <tbody id="machineTbl">
+        <tr><td colspan="4" style="text-align:center;color:#aaa;padding:20px">กำลังโหลด...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Monthly Summary -->
+  <div class="section-lbl">📅 สรุปงานรายเดือน</div>
+  <div class="charts-row">
+    <div class="card">
+      <p class="card-title">ยอดงานแต่ละเดือน (EA.)</p>
+      <p class="card-sub">จากวันที่คาดว่าจะผลิตเสร็จ</p>
+      <div style="position:relative;width:100%;height:260px">
+        <canvas id="monthBarChart"></canvas>
+      </div>
+    </div>
+    <div class="card" style="min-width:0">
+      <p class="card-title">รายละเอียดรายเดือน</p>
+      <p class="card-sub">จำนวนรายการและยอดรวมแต่ละเดือน</p>
+      <div class="tbl-wrap" style="margin-bottom:0;border:none">
+        <table>
+          <thead>
+            <tr>
+              <th>เดือน</th>
+              <th class="num">รายการ</th>
+              <th class="num">ยอดรวม (EA.)</th>
+              <th class="num">เฉลี่ย/รายการ</th>
+            </tr>
+          </thead>
+          <tbody id="monthTbl"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB: Finished Good ===== -->
+<div class="tab-panel" id="tab-fg">
+
+  <!-- KPI Grid -->
+  <div class="kpi-grid">
+    <div class="kpi teal">
+      <p class="kpi-lbl">รายการ FG</p>
+      <p class="kpi-val" id="fk1">–</p>
+      <p class="kpi-unit">รายการ</p>
+    </div>
+    <div class="kpi green">
+      <p class="kpi-lbl">งานสำเร็จรวม</p>
+      <p class="kpi-val" id="fk2">–</p>
+      <p class="kpi-unit">EA.</p>
+    </div>
+    <div class="kpi red">
+      <p class="kpi-lbl">งานเสียรวม</p>
+      <p class="kpi-val" id="fk3">–</p>
+      <p class="kpi-unit">EA.</p>
+    </div>
+    <div class="kpi blue">
+      <p class="kpi-lbl">งานรวมทั้งหมด</p>
+      <p class="kpi-val" id="fk4">–</p>
+      <p class="kpi-unit">EA.</p>
+    </div>
+    <div class="kpi amber">
+      <p class="kpi-lbl">พร้อมส่ง</p>
+      <p class="kpi-val" id="fk5">–</p>
+      <p class="kpi-unit">รายการ</p>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="charts-row">
+    <div class="card">
+      <p class="card-title">ยอด Finished Good รายชิ้น (EA.)</p>
+      <p class="card-sub">เปรียบเทียบงานสำเร็จและงานเสียแต่ละรายการ</p>
+      <div class="legend">
+        <span class="li"><span class="ld" style="background:#1D9E75"></span>งานสำเร็จ</span>
+        <span class="li"><span class="ld" style="background:#E24B4A"></span>งานเสีย</span>
+      </div>
+      <div style="position:relative;width:100%;height:240px">
+        <canvas id="fgBar" role="img" aria-label="กราฟแท่ง FG">ยอด FG รายชิ้น</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <p class="card-title">สัดส่วน FG รายชิ้น</p>
+      <p class="card-sub">% ของยอดรวมทั้งหมด</p>
+      <div class="legend" id="fgPieLeg"></div>
+      <div style="position:relative;width:100%;height:200px">
+        <canvas id="fgPie" role="img" aria-label="กราฟวงกลม FG">สัดส่วน FG</canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Line Chart -->
+  <div class="card">
+    <p class="card-title">📈 แนวโน้มงานสำเร็จ vs งานเสีย (EA.)</p>
+    <p class="card-sub">เปรียบเทียบงานสำเร็จและงานเสียรายชิ้นแบบกราฟเส้น</p>
+    <div style="position:relative;width:100%;height:280px">
+      <canvas id="fgLineChart"></canvas>
+    </div>
+  </div>
+
+  <!-- FG Table -->
+  <div class="section-lbl">📦 รายละเอียด Finished Good</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Part Name</th>
+          <th>Dwg.</th>
+          <th>อัพเดท</th>
+          <th class="num">สำเร็จ (EA.)</th>
+          <th class="num">เสีย (EA.)</th>
+          <th class="num">รวม (EA.)</th>
+          <th>หมายเหตุ</th>
+          <th>พร้อมส่ง</th>
+        </tr>
+      </thead>
+      <tbody id="fgTbl">
+        <tr><td colspan="9" style="text-align:center;color:#aaa;padding:20px">กำลังโหลด...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== TAB: สต๊อกงานแก้ไข ===== -->
+<div class="tab-panel" id="tab-fix">
+
+  <!-- Setup Banner สำหรับ URL งานแก้ไข -->
+  <div id="fixBanner" style="background:#fff8e1;border:1px solid #fde68a;border-radius:10px;padding:16px 20px;margin-bottom:16px;display:none">
+    <h3 style="font-size:14px;font-weight:700;color:#92400e;margin-bottom:8px">⚙️ ตั้งค่า URL ชีตสต๊อกงานแก้ไข</h3>
+    <p style="font-size:13px;color:#78350f;line-height:1.8;margin-bottom:10px">
+      ใช้ Apps Script เดิม (ตัวเดียวกับแผนผลิต) — วาง URL เดียวกันได้เลย<br>
+      ชีตชื่อ: <code style="background:#fef9c3;padding:2px 6px;border-radius:4px"><b>บันทึกสต๊อกงานแก้ไข</b></code>
+    </p>
+    <input type="text" id="fixUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
+      style="width:100%;padding:9px 12px;border:1px solid #fde68a;border-radius:8px;font-size:14px;margin-bottom:10px">
+    <button onclick="saveFixUrl()" style="background:#92400e;color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:14px;cursor:pointer;margin-right:8px">💾 บันทึก URL</button>
+    <button onclick="document.getElementById('fixBanner').style.display='none'" style="background:#888;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:14px;cursor:pointer">ปิด</button>
+  </div>
+
+  <!-- KPI Grid -->
+  <div class="kpi-grid">
+    <div class="kpi blue">
+      <p class="kpi-lbl">รายการทั้งหมด</p>
+      <p class="kpi-val" id="xk1">–</p>
+      <p class="kpi-unit">รายการ</p>
+    </div>
+    <div class="kpi red">
+      <p class="kpi-lbl">ยอดรวม (EA.)</p>
+      <p class="kpi-val" id="xk2">–</p>
+      <p class="kpi-unit">EA.</p>
+    </div>
+    <div class="kpi amber">
+      <p class="kpi-lbl">Part ไม่ซ้ำ</p>
+      <p class="kpi-val" id="xk3">–</p>
+      <p class="kpi-unit">ชิ้น</p>
+    </div>
+    <div class="kpi purple">
+      <p class="kpi-lbl">รับล่าสุด</p>
+      <p class="kpi-val" id="xk4" style="font-size:18px">–</p>
+      <p class="kpi-unit">วันที่</p>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <div class="card">
+      <p class="card-title">ยอดงานแก้ไขรายชิ้น (EA.)</p>
+      <p class="card-sub">แยกตาม Part Name</p>
+      <div style="position:relative;width:100%;height:260px">
+        <canvas id="fixBarChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <p class="card-title">สัดส่วนงานแก้ไข</p>
+      <p class="card-sub">% แต่ละ Part จากยอดรวมทั้งหมด</p>
+      <div class="legend" id="fixPieLeg"></div>
+      <div style="position:relative;width:100%;height:200px">
+        <canvas id="fixPieChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline Chart -->
+  <div class="card">
+    <p class="card-title">📅 Timeline การรับงานแก้ไข</p>
+    <p class="card-sub">ยอดสะสมรายวัน (EA.) ตามวันที่รับงาน</p>
+    <div style="position:relative;width:100%;height:240px">
+      <canvas id="fixLineChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="section-lbl">🔧 รายละเอียดสต๊อกงานแก้ไข</div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+    <input type="text" id="fixSearch" placeholder="🔍 ค้นหา Part Name / Dwg. / หมายเหตุ..."
+      oninput="filterFixTable()" style="flex:1;min-width:200px;padding:7px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px">
+    <button onclick="showFixSetup()" style="font-size:12px;padding:6px 14px;background:#fff8e1;border:1px solid #fde68a;border-radius:7px;cursor:pointer;color:#92400e">⚙️ ตั้งค่า URL</button>
+    <button onclick="loadFix(true)" style="font-size:12px;padding:6px 14px;background:#dbeafe;border:1px solid #93c5fd;border-radius:7px;cursor:pointer;color:#1e40af">↻ รีเฟรช</button>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Part Name</th>
+          <th>Dwg.</th>
+          <th class="num">จำนวน (EA.)</th>
+          <th>วันที่รับงานแก้</th>
+          <th>หมายเหตุ</th>
+        </tr>
+      </thead>
+      <tbody id="fixTbl">
+        <tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px">กด "ตั้งค่า URL" เพื่อโหลดข้อมูล</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Snapshot info -->
+  <div id="fixSnapshotInfo" style="margin-top:8px;font-size:11px;color:#888"></div>
+</div>
+
+<script>
+/* ========== Constants ========== */
+const STORAGE_KEY = 'agt_script_url_v2';
+const STORAGE_KEY_DB  = 'agt_db_url_v1';
+const STORAGE_KEY_FIX = 'agt_fix_url_v1';   // URL ชีตงานแก้ไข
+const CACHE_KEY_PLAN = 'agt_cache_plan';
+const CACHE_KEY_FG = 'agt_cache_fg';
+const CACHE_KEY_TS      = 'agt_cache_ts';
+const EMBEDDED_KEY_PLAN = 'agt_embedded_plan';   // fallback ถาวรแยกจาก cache
+const EMBEDDED_KEY_FG   = 'agt_embedded_fg';
+const EMBEDDED_KEY_TS   = 'agt_embedded_ts';
+const SHEET_PLAN = 'แผนการผลิตงานพับ AGT';
+const SHEET_FG   = 'ตาราง Finished Good';
+const SHEET_DB   = 'ฐานข้อมูลสรุปยอดงานรายเดือน AGT';
+const SHEET_FIX  = 'บันทึกสต๊อกงานแก้ไข';
+
+let lastSavedHash      = '';
+let lastPlanRows       = null;
+let lastFgRows         = null;
+let lastFixRows        = null;   // งานแก้ไข
+let lastAutoSaveMinute = -1;  // ป้องกัน DB auto-save ซ้ำในรอบเดียวกัน
+
+// สร้างสีไม่ซ้ำกันตามจำนวนชิ้นงาน — กระจาย hue ให้ห่างกันมากที่สุด
+function genColors(n) {
+  const colors = [];
+  // ใช้ golden angle เพื่อกระจายสีให้ห่างกันสม่ำเสมอ
+  const goldenAngle = 137.508;
+  // offset เพื่อหลีกเลี่ยงสีใกล้เคียงกับสีสถานะ (เขียว=120°, เหลือง=60°, แดง=0°)
+  const startHue = 200;
+  for (let i = 0; i < n; i++) {
+    const hue = (startHue + i * goldenAngle) % 360;
+    // สลับ saturation/lightness ให้ดูต่างกันมากขึ้นเมื่อจำนวนมาก
+    const sat = 65 + (i % 3) * 8;       // 65%, 73%, 81%
+    const lit = 42 + (i % 2) * 10;      // 42%, 52%
+    colors.push(`hsl(${hue.toFixed(0)},${sat}%,${lit}%)`);
+  }
+  return colors;
+}
+
+const PIE_C = genColors(20); // pre-generate 20 สี
+const STATUS_COLORS = {
+  // งานพับ
+  'กำลังพับ':    { pie: '#1D9E75', cls: 'b-bending' },
+  'รอพับ':       { pie: '#F59E0B', cls: 'b-wait' },
+  'หยุดชั่วคราว':{ pie: '#E24B4A', cls: 'b-pause' },
+  'F/A':         { pie: '#22c55e', cls: 'b-fa' },
+  // งานอัด/ปั๊ม
+  'กำลังอัด':   { pie: '#0891B2', cls: 'b-bending' },
+  'รออัด':      { pie: '#6366F1', cls: 'b-wait' },
+  'หยุดอัด':    { pie: '#f97316', cls: 'b-pause' },
+  // งานแก้ไข/อื่นๆ
+  'แก้ไข':      { pie: '#8B5CF6', cls: 'b-gray' },
+  'รออัดแก้ไข': { pie: '#EC4899', cls: 'b-gray' },
+  'รอแก้ไข':    { pie: '#14b8a6', cls: 'b-gray' },
+  'เสร็จแล้ว':  { pie: '#84cc16', cls: 'b-fa' },
+  'ส่งแล้ว':    { pie: '#10b981', cls: 'b-fa' },
+};
+
+// สร้างสี pie สถานะอัตโนมัติสำหรับสถานะที่ไม่รู้จัก
+function getStatusPieColor(statusKey, allKeys) {
+  if (STATUS_COLORS[statusKey]) return STATUS_COLORS[statusKey].pie;
+  // สถานะใหม่ที่ไม่รู้จัก — สุ่มสีจาก index
+  const unknownKeys = allKeys.filter(k => !STATUS_COLORS[k]);
+  const idx = unknownKeys.indexOf(statusKey);
+  const extras = ['#a78bfa','#fb923c','#34d399','#f472b6','#60a5fa','#facc15','#4ade80','#e879f9'];
+  return extras[idx % extras.length];
+}
+
+function getStatusCls(st) {
+  return (STATUS_COLORS[st] || { cls: 'b-gray' }).cls;
+}
+
+let barInst = null, pieInst = null, fgBarInst = null, fgPieInst = null, fgLineInst = null, monthBarInst = null;
+
+/* ========== URL Management ========== */
+function getUrl() {
+  return localStorage.getItem(STORAGE_KEY) || '';
+}
+
+function saveUrl() {
+  const v = document.getElementById('urlInput').value.trim();
+  if (!v || !v.startsWith('https://script.google.com')) {
+    alert('URL ไม่ถูกต้อง');
+    return;
+  }
+  localStorage.setItem(STORAGE_KEY, v);
+  document.getElementById('setupBanner').style.display = 'none';
+  loadAll();
+}
+
+function showSetup() {
+  document.getElementById('setupBanner').style.display = 'block';
+  document.getElementById('urlInput').value = getUrl() || '';
+}
+
+/* ========== Tab Switching ========== */
+function switchTab(t) {
+  const names = ['plan', 'fg', 'fix'];
+  document.querySelectorAll('.tab').forEach((el, i) => {
+    el.classList.toggle('active', names[i] === t);
+  });
+  document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + t).classList.add('active');
+  // lazy load งานแก้ไขครั้งแรกที่เปิด tab
+  if (t === 'fix' && !lastFixRows) loadFix(false);
+}
+
+/* ========== Status Bar ========== */
+function setStatus(msg, cls) {
+  const bar = document.getElementById('statusBar');
+  bar.className = cls;
+  document.getElementById('statusMsg').textContent = msg;
+  const m = { 'info': 'dot-info', 'ok': 'dot-ok', 'err': 'dot-err', 'warn': 'dot-warn' };
+  bar.querySelector('.dot').className = 'dot ' + (m[cls] || 'dot-info');
+}
+
+/* ========== Utility Functions ========== */
+function toNum(v) {
+  const s = String(v || '').replace(/[^0-9.\-]/g, '');
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = String(s || '');
+  return d.innerHTML;
+}
+
+function fmtDate(v) {
+  if (!v) return '';
+  const s = String(v).trim();
+  if (!s || s === '-') return s;
+  // ISO format จาก Google Sheets: 2026-06-16 → 16/06/26
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) {
+    let y = parseInt(iso[1]);
+    if (y > 2400) y -= 543; // พ.ศ. → ค.ศ.
+    return iso[3] + '/' + iso[2] + '/' + String(y).slice(2);
+  }
+  // dd/mm/yyyy พ.ศ. → dd/mm/yy ค.ศ.
+  const be = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (be) {
+    let y = parseInt(be[3]);
+    if (y > 2400) y -= 543;
+    return be[1] + '/' + be[2] + '/' + String(y).slice(2);
+  }
+  return s;
+}
+
+function filterData(rows) {
+  if (!Array.isArray(rows)) return [];
+  return rows.filter(r => {
+    if (!Array.isArray(r)) return false;
+    const c0 = String(r[0] || '').trim();
+    const c1 = String(r[1] || '').trim();
+    return c0 && !isNaN(parseInt(c0)) && c1 && c1 !== 'Part Name';
+  });
+}
+
+/* ========== Render Plan Tab ========== */
+function renderPlan(rows) {
+  const data = filterData(rows);
+  const total = data.length;
+  const byStatus = {};
+  let sumQty = 0;
+
+  data.forEach(r => {
+    const st = String(r[5] || '').trim() || 'ไม่ระบุ';
+    byStatus[st] = (byStatus[st] || 0) + 1;
+    sumQty += toNum(r[3]);
+  });
+
+  document.getElementById('pk1').textContent = total;
+  document.getElementById('pk2').textContent = byStatus['กำลังพับ'] || 0;
+  document.getElementById('pk3').textContent = byStatus['รอพับ'] || 0;
+  document.getElementById('pk4').textContent = byStatus['หยุดชั่วคราว'] || 0;
+  document.getElementById('pk5').textContent = sumQty.toLocaleString();
+
+  const names = data.map(r => String(r[1] || '').trim().replace(/\s+/g, ' '));
+  const qtys = data.map(r => toNum(r[3]));
+  // สีต่อชิ้นงาน — generate ตามจำนวนจริง ไม่ซ้ำกัน
+  const itemColors = genColors(data.length);
+
+  if (barInst) barInst.destroy();
+  barInst = new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: names,
+      datasets: [{
+        label: 'จำนวน (EA.)',
+        data: qtys,
+        backgroundColor: itemColors,
+        borderWidth: 0,
+        borderRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y.toLocaleString()} EA.` } }
+      },
+      scales: {
+        x: {
+          ticks: { font: { size: 10 }, autoSkip: false, maxRotation: 40 },
+          grid: { display: false }
+        },
+        y: {
+          ticks: { callback: v => v.toLocaleString() },
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  const stK = Object.keys(byStatus), stV = stK.map(k => byStatus[k]);
+  const stC = stK.map(k => getStatusPieColor(k, stK));
+  if (pieInst) pieInst.destroy();
+  pieInst = new Chart(document.getElementById('statusPie'), {
+    type: 'doughnut',
+    data: {
+      labels: stK,
+      datasets: [{
+        data: stV,
+        backgroundColor: stC,
+        borderWidth: 2,
+        borderColor: '#fff',
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '55%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const pct = Math.round(ctx.parsed / total * 100);
+              return ` ${ctx.parsed} รายการ (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  document.getElementById('statusLeg').innerHTML = stK.map((k, i) => {
+    const pct = Math.round(stV[i] / total * 100);
+    return `<span class="li"><span class="ld" style="background:${stC[i]}"></span>${k} ${pct}%</span>`;
+  }).join('');
+
+  const planTbl = document.getElementById('planTbl');
+  planTbl.innerHTML = '';
+  data.forEach((r, i) => {
+    const st = String(r[5] || '').trim();
+    const sc = getStatusCls(st);
+    const dotColor = itemColors[i] || '#94a3b8';
+    planTbl.innerHTML += `<tr>
+      <td>${esc(r[0])}</td>
+      <td style="white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis" title="${esc(r[1])}">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${dotColor};margin-right:5px;flex-shrink:0;vertical-align:middle"></span>${esc(String(r[1] || '').trim())}</td>
+      <td style="white-space:nowrap">${esc(r[2] || '')}</td>
+      <td class="num"><b>${toNum(r[3]).toLocaleString()}</b></td>
+      <td style="white-space:nowrap">${fmtDate(r[4])}</td>
+      <td><span class="badge ${sc}">${esc(st) || '–'}</span></td>
+      <td style="white-space:nowrap">${esc(r[6] || '')}</td>
+      <td style="white-space:nowrap">${fmtDate(r[7])}</td>
+      <td style="white-space:nowrap">${fmtDate(r[8])}</td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r[9])}">${esc(r[9] || '–')}</td>
+      <td style="white-space:nowrap">${fmtDate(r[10])}</td>
+    </tr>`;
+  });
+
+  const byM = {};
+  data.forEach(r => {
+    const m = String(r[6] || '').trim() || 'ไม่ระบุ';
+    if (!byM[m]) byM[m] = { c: 0, q: 0 };
+    byM[m].c++;
+    byM[m].q += toNum(r[3]);
+  });
+
+  let tq = 0;
+  Object.values(byM).forEach(v => tq += v.q);
+  const machineTbl = document.getElementById('machineTbl');
+  machineTbl.innerHTML = '';
+  Object.entries(byM).sort((a, b) => b[1].q - a[1].q).forEach(([m, v]) => {
+    const pct = tq > 0 ? (v.q / tq * 100).toFixed(1) : 0;
+    machineTbl.innerHTML += `<tr>
+      <td><b>${esc(m)}</b></td>
+      <td class="num">${v.c} รายการ</td>
+      <td class="num">${v.q.toLocaleString()} EA.</td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="prog-bar" style="width:100px"><div class="prog-fill" style="width:${pct}%;background:#185FA5"></div></div>
+        <span style="font-size:12px;color:#666">${pct}%</span>
+      </div></td>
+    </tr>`;
+  });
+
+  renderMonthly(data);
+}
+
+/* ========== Monthly Summary ========== */
+function parseDate(str) {
+  if (!str || String(str).trim() === '-' || String(str).trim() === '') return null;
+  const s = String(str).trim();
+
+  // รูปแบบ ISO: 2026-06-16
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) {
+    let y = parseInt(iso[1]);
+    if (y > 2400) y -= 543; // พ.ศ. → ค.ศ.
+    return new Date(y, parseInt(iso[2]) - 1, parseInt(iso[3]));
+  }
+
+  // รูปแบบ dd/mm/yyyy หรือ dd/mm/yy
+  const parts = s.split('/');
+  if (parts.length !== 3) return null;
+  let [d, m, y] = parts.map(Number);
+  if (isNaN(d) || isNaN(m) || isNaN(y) || !d || !m) return null;
+  if (y > 2400) y -= 543;       // พ.ศ. 4 หลัก เช่น 2569
+  else if (y < 100) y += 2000;  // ค.ศ. 2 หลัก เช่น 26
+  return new Date(y, m - 1, d);
+}
+
+const MONTH_TH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+function renderMonthly(data) {
+  const byMonth = {};
+  data.forEach(r => {
+    const dt = parseDate(r[8]) || parseDate(r[7]);
+    if (!dt) return;
+    // ใช้ปี ค.ศ. เสมอ (parseDate แปลงให้แล้ว)
+    const y   = dt.getFullYear();
+    const m   = dt.getMonth();
+    const key = `${y}-${String(m + 1).padStart(2, '0')}`;
+    const label = `${MONTH_TH[m]} ${y}`;
+    if (!byMonth[key]) byMonth[key] = { label, count: 0, qty: 0 };
+    byMonth[key].count++;
+    byMonth[key].qty += toNum(r[3]);
+  });
+
+  const sorted = Object.keys(byMonth).sort();
+  const labels = sorted.map(k => byMonth[k].label);
+  const counts = sorted.map(k => byMonth[k].count);
+  const qtys = sorted.map(k => byMonth[k].qty);
+  const totalQty = qtys.reduce((a, b) => a + b, 0);
+
+  const BAR_COLORS = genColors(Math.max(sorted.length, 8));
+
+  if (monthBarInst) monthBarInst.destroy();
+  monthBarInst = new Chart(document.getElementById('monthBarChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'ยอดรวม (EA.)',
+          data: qtys,
+          borderColor: '#185FA5',
+          backgroundColor: 'rgba(24,95,165,0.10)',
+          pointBackgroundColor: '#185FA5',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          tension: 0.35,
+          fill: true,
+          yAxisID: 'y'
+        },
+        {
+          label: 'จำนวนรายการ',
+          data: counts,
+          borderColor: '#E24B4A',
+          backgroundColor: 'rgba(226,75,74,0.08)',
+          pointBackgroundColor: '#E24B4A',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          tension: 0.35,
+          fill: true,
+          yAxisID: 'y2',
+          borderDash: [5, 4]
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: { font: { size: 11 }, usePointStyle: true, pointStyleWidth: 10 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ctx.dataset.yAxisID === 'y2'
+              ? ` จำนวน: ${ctx.parsed.y} รายการ`
+              : ` ยอดรวม: ${ctx.parsed.y.toLocaleString()} EA.`
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { font: { size: 11 } },
+          grid: { color: 'rgba(0,0,0,0.04)' }
+        },
+        y: {
+          position: 'left',
+          ticks: { callback: v => v.toLocaleString() },
+          grid: { color: 'rgba(0,0,0,0.06)' },
+          beginAtZero: true,
+          title: { display: true, text: 'EA.', font: { size: 10 }, color: '#185FA5' }
+        },
+        y2: {
+          position: 'right',
+          ticks: { stepSize: 1, callback: v => v + ' รายการ', color: '#E24B4A' },
+          grid: { display: false },
+          beginAtZero: true,
+          title: { display: true, text: 'รายการ', font: { size: 10 }, color: '#E24B4A' }
+        }
+      }
+    }
+  });
+
+  const monthTbl = document.getElementById('monthTbl');
+  monthTbl.innerHTML = '';
+  sorted.forEach((k, i) => {
+    const v = byMonth[k];
+    const avg = v.count > 0 ? Math.round(v.qty / v.count) : 0;
+    const pct = totalQty > 0 ? (v.qty / totalQty * 100).toFixed(1) : '0.0';
+    monthTbl.innerHTML += `<tr>
+      <td><span class="ld" style="background:${BAR_COLORS[i % BAR_COLORS.length]};display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px"></span><b>${v.label}</b></td>
+      <td class="num">${v.count} รายการ</td>
+      <td class="num"><b>${v.qty.toLocaleString()}</b> EA. <span style="color:#aaa;font-size:10px">(${pct}%)</span></td>
+      <td class="num">${avg.toLocaleString()} EA.</td>
+    </tr>`;
+  });
+
+  if (sorted.length === 0) {
+    monthTbl.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:16px">ไม่พบข้อมูลวันที่</td></tr>';
+  } else {
+    monthTbl.innerHTML += `<tr class="total-row">
+      <td><b>รวมทั้งหมด</b></td>
+      <td class="num">${counts.reduce((a, b) => a + b, 0)} รายการ</td>
+      <td class="num"><b>${totalQty.toLocaleString()} EA.</b></td>
+      <td class="num">–</td>
+    </tr>`;
+  }
+}
+
+/* ========== Render FG Tab ========== */
+function renderFG(rows) {
+  const data = filterData(rows);
+  const fgOk = data.map(r => toNum(r[4]));
+  const fgBad = data.map(r => toNum(r[5]));
+  const fgAll = data.map(r => toNum(r[6]));
+  const names = data.map(r => String(r[1] || '').trim().replace(/\s+/g, ' '));
+  const total = fgAll.reduce((a, b) => a + b, 0);
+  const totOk = fgOk.reduce((a, b) => a + b, 0);
+  const totBad = fgBad.reduce((a, b) => a + b, 0);
+  const ready = data.filter(r => String(r[8] || '').toUpperCase() === 'TRUE').length;
+  // สีต่อชิ้นงาน FG — offset hue เพื่อไม่ให้ซ้ำกับแผนผลิต
+  const fgColors = genColors(Math.max(data.length, 4)).map((c,i) => {
+    // shift hue เพิ่ม 60° เพื่อแยกจาก plan colors
+    return c.replace(/hsl\((\d+)/, (_,h) => `hsl(${(parseInt(h)+60)%360}`);
+  });
+
+  document.getElementById('fk1').textContent = data.length;
+  document.getElementById('fk2').textContent = totOk.toLocaleString();
+  document.getElementById('fk3').textContent = totBad.toLocaleString();
+  document.getElementById('fk4').textContent = total.toLocaleString();
+  document.getElementById('fk5').textContent = ready;
+
+  if (fgBarInst) fgBarInst.destroy();
+  fgBarInst = new Chart(document.getElementById('fgBar'), {
+    type: 'bar',
+    data: {
+      labels: names,
+      datasets: [
+        { label: 'งานสำเร็จ', data: fgOk, backgroundColor: '#1D9E75', borderWidth: 0, borderRadius: 4 },
+        { label: 'งานเสีย', data: fgBad, backgroundColor: '#E24B4A', borderWidth: 0, borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()} EA.` } }
+      },
+      scales: {
+        x: {
+          ticks: { font: { size: 10 }, autoSkip: false, maxRotation: 35 },
+          grid: { display: false }
+        },
+        y: {
+          ticks: { callback: v => v.toLocaleString() },
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  if (fgPieInst) fgPieInst.destroy();
+  fgPieInst = new Chart(document.getElementById('fgPie'), {
+    type: 'doughnut',
+    data: {
+      labels: names,
+      datasets: [{
+        data: fgAll,
+        backgroundColor: fgColors,
+        borderWidth: 2,
+        borderColor: '#fff',
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '55%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const pct = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
+              return ` ${ctx.parsed.toLocaleString()} EA. (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  document.getElementById('fgPieLeg').innerHTML = names.map((n, i) => {
+    const pct = total > 0 ? Math.round(fgAll[i] / total * 100) : 0;
+    const s = n.length > 18 ? n.slice(0, 17) + '…' : n;
+    return `<span class="li"><span class="ld" style="background:${fgColors[i] || '#aaa'}"></span>${s} ${pct}%</span>`;
+  }).join('');
+
+  if (fgLineInst) fgLineInst.destroy();
+  fgLineInst = new Chart(document.getElementById('fgLineChart'), {
+    type: 'line',
+    data: {
+      labels: names,
+      datasets: [
+        {
+          label: 'งานสำเร็จ (EA.)',
+          data: fgOk,
+          borderColor: '#1D9E75',
+          backgroundColor: 'rgba(29,158,117,0.10)',
+          pointBackgroundColor: '#1D9E75',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 9,
+          tension: 0.35,
+          fill: true
+        },
+        {
+          label: 'งานเสีย (EA.)',
+          data: fgBad,
+          borderColor: '#E24B4A',
+          backgroundColor: 'rgba(226,75,74,0.08)',
+          pointBackgroundColor: '#E24B4A',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 9,
+          tension: 0.35,
+          fill: true,
+          borderDash: [5, 4]
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: { font: { size: 12 }, usePointStyle: true, pointStyleWidth: 12 }
+        },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()} EA.` } }
+      },
+      scales: {
+        x: {
+          ticks: { font: { size: 11 }, autoSkip: false, maxRotation: 30 },
+          grid: { color: 'rgba(0,0,0,0.04)' }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { callback: v => v.toLocaleString() },
+          grid: { color: 'rgba(0,0,0,0.06)' },
+          title: { display: true, text: 'EA.', font: { size: 10 } }
+        }
+      }
+    }
+  });
+
+  const fgTbl = document.getElementById('fgTbl');
+  fgTbl.innerHTML = '';
+  data.forEach((r, i) => {
+    const pct = total > 0 ? (fgAll[i] / total * 100).toFixed(1) : '0.0';
+    const isReady = String(r[8] || '').toUpperCase() === 'TRUE';
+    fgTbl.innerHTML += `<tr>
+      <td>${esc(r[0])}</td>
+      <td style="white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis" title="${esc(r[1])}">${esc(String(r[1] || '').trim())}</td>
+      <td style="white-space:nowrap">${esc(r[2] || '')}</td>
+      <td style="white-space:nowrap">${fmtDate(r[3])}</td>
+      <td class="num"><b style="color:#1D9E75">${fgOk[i].toLocaleString()}</b></td>
+      <td class="num"><span style="color:${fgBad[i] > 0 ? '#E24B4A' : '#aaa'}">${fgBad[i] || '–'}</span></td>
+      <td class="num"><b>${fgAll[i].toLocaleString()}</b></td>
+      <td>${fmtDate(r[7])}</td>
+      <td><span class="badge ${isReady ? 'b-ready' : 'b-not-ready'}">${isReady ? '✓ พร้อม' : 'รอ'}</span></td>
+    </tr>`;
+  });
+
+  fgTbl.innerHTML += `<tr class="total-row">
+    <td></td><td colspan="3" style="text-align:right;color:#888">รวม</td>
+    <td class="num">${totOk.toLocaleString()}</td>
+    <td class="num">${totBad.toLocaleString()}</td>
+    <td class="num">${total.toLocaleString()}</td>
+    <td></td><td></td>
+  </tr>`;
+}
+
+/* ========== Fallback Data ========== */
+const PLAN_FALLBACK = [
+  ['แผนการผลิตงานพับ AGT'],
+  ['ลำดับ', 'Part Name', 'หมายเลข Dwg.', 'จำนวน (EA.)', 'วันที่อัพเดทสต็อก', 'สถานะ', 'หมายเลขเครื่องพับ', 'วันที่เริ่มดำเนินการผลิต', 'วันที่คาดว่าจะผลิตเสร็จ', 'หมายเหตุ', 'วันรับเข้า'],
+  ['1', 'SIDE PANEL VERT STIFF -B (OCPV3)', 'C10-01602', '331 EA', '12/06/26', 'หยุดชั่วคราว', 'No.04', '15/06/26', '16/06/26', 'แทรกผลิต Front Post LH', '11/06/26'],
+  ['2', 'Front Post LH', '023-00101206', '299 EA', '12/06/26', 'กำลังพับ', 'No.04', '12/06/26', '15/06/26', 'งานด่วน', '11/06/26'],
+  ['3', 'Move Stabilizer Sid-IEC', '023-00303102', '281 EA', '12/06/26', 'กำลังพับ', 'No.02', '12/06/26', '15/06/26', '-', '11/06/26'],
+  ['4', 'SIDE PANEL VERT STIFF-750W', '023-01204500', '321 EA', '12/06/26', 'รอพับ', 'No.04', '16/06/26', '17/06/26', '-', '11/06/26'],
+  ['5', 'STIFF Right PMA 800 mm. Nets Sx', 'C20-03601201', '80 EA', '12/06/26', 'กำลังพับ', 'No.01', '12/06/26', '12/06/26', '-', '11/06/26'],
+  ['6', 'STIFF Left PMA 800 mm. Nets Sx', 'C20-03601101', '80 EA', '12/06/26', 'รอพับ', 'No.01', '12/06/26', '12/06/26', '-', '11/06/26'],
+];
+
+const FG_FALLBACK = [
+  ['ตาราง Finished Good'],
+  ['ลำดับ', 'Part Name', 'หมายเลข Dwg.', 'วันที่อัพเดทสต็อก', 'จำนวนงานสำเร็จ (EA.)', 'จำนวนงานเสีย (EA.)', 'จำนวนงานรวม (EA.)', 'หมายเหตุ', 'รายการพร้อมส่ง'],
+  ['1', 'SIDE_PANEL_44OU_CROSSBAR', '023-01205803', '12/06/26', '183 EA.', '-', '183 EA.', '1 พาเลท', 'FALSE'],
+  ['2', 'SIDE PANEL 4UD3', 'C17-00900705', '12/06/26', '204 EA.', '-', '204 EA.', '1 พาเลท', 'FALSE'],
+  ['3', 'FRONT POST-COVER_LH', '023-01203602', '12/06/26', '100 EA.', '-', '100 EA', '1 พาเลท', 'FALSE'],
+];
+
+/* ========== Fetch Data ========== */
+function fetchSheet(url, sheetName) {
+  const fullUrl = url + '?sheet=' + encodeURIComponent(sheetName);
+  return fetch(fullUrl, { redirect: 'follow' })
+    .then(r => r.text())
+    .then(text => {
+      const clean = text.trim().replace(/^\uFEFF/, '');
+      let parsed;
+      try {
+        parsed = JSON.parse(clean);
+      } catch (e) {
+        throw new Error('JSON parse error: ' + e.message);
+      }
+      if (Array.isArray(parsed)) return parsed;
+      if (parsed && Array.isArray(parsed.values)) return parsed.values;
+      if (parsed && parsed.error) throw new Error('Sheet error: ' + parsed.error);
+      const keys = Object.keys(parsed);
+      for (const k of keys) {
+        if (Array.isArray(parsed[k])) return parsed[k];
+      }
+      throw new Error('ข้อมูลที่ได้ไม่ใช่ Array: ' + JSON.stringify(parsed).slice(0, 100));
+    });
+}
+
+/* ========== Cache Management ========== */
+function saveCache(planRows, fgRows) {
+  try {
+    localStorage.setItem(CACHE_KEY_PLAN, JSON.stringify(planRows));
+    localStorage.setItem(CACHE_KEY_FG, JSON.stringify(fgRows));
+    localStorage.setItem(CACHE_KEY_TS, new Date().toLocaleString('th-TH'));
+    updateCacheInfo();
+  } catch (e) {
+    console.warn('saveCache failed:', e);
+  }
+}
+
+function loadCache() {
+  try {
+    const p = localStorage.getItem(CACHE_KEY_PLAN);
+    const f = localStorage.getItem(CACHE_KEY_FG);
+    const t = localStorage.getItem(CACHE_KEY_TS) || '–';
+    if (p && f) return { planRows: JSON.parse(p), fgRows: JSON.parse(f), ts: t };
+  } catch (e) {
+    console.warn('loadCache failed:', e);
+  }
+  return null;
+}
+
+/* =================================================================
+   DAILY RECORD SYSTEM
+   โครงสร้าง localStorage:
+     agt_daily_store_v1 = {
+       days: {
+         '2026-06-16': {
+           dateKey: '2026-06-16',
+           dateLabel: '16 มิ.ย. 2569',
+           ts: '16/6/2569 09:32:00',
+           planRows: [...],   // ข้อมูลเต็มจาก sheet
+           fgRows:   [...]
+         },
+         ...
+       }
+     }
+   รวมเดือน: grouping key = '2026-06'
+================================================================= */
+const DAILY_STORE_KEY = 'agt_daily_store_v1';
+const MAX_DAYS        = 180; // เก็บสูงสุด 180 วัน (~6 เดือน)
+
+function loadDailyStore() {
+  try {
+    const raw = localStorage.getItem(DAILY_STORE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { days: {} };
+}
+
+function saveDailyStore(store) {
+  try {
+    // ถ้าเกิน MAX_DAYS ลบวันเก่าสุดออก
+    const keys = Object.keys(store.days).sort();
+    if (keys.length > MAX_DAYS) {
+      keys.slice(0, keys.length - MAX_DAYS).forEach(k => delete store.days[k]);
+    }
+    localStorage.setItem(DAILY_STORE_KEY, JSON.stringify(store));
+  } catch(e) {
+    console.warn('saveDailyStore failed (storage full?):', e);
+    // ถ้า storage เต็ม ลบข้อมูลเก่า 30 วันแล้วลองใหม่
+    const keys = Object.keys(store.days).sort();
+    keys.slice(0, 30).forEach(k => delete store.days[k]);
+    try { localStorage.setItem(DAILY_STORE_KEY, JSON.stringify(store)); } catch(e2) {}
+  }
+}
+
+// บันทึก snapshot ของวันนี้ (เรียกทุกครั้งที่ดึงข้อมูลสำเร็จ)
+/* ================================================================
+   ระบบตรวจสอบข้อมูลก่อนบันทึก
+   - กรองแถวที่ไม่มี Part Name หรือ Dwg. ออก
+   - กันซ้ำ: Part Name เดิมในวันเดิม → update ค่าล่าสุด
+================================================================ */
+function validateRows(rows) {
+  const data = filterData(rows);
+  const seen  = new Set();
+  const valid = [];
+  const skipped = { noName: 0, noDwg: 0, dup: 0 };
+
+  data.forEach(r => {
+    const name = String(r[1]||'').trim();
+    const dwg  = String(r[2]||'').trim();
+    if (!name)          { skipped.noName++; return; }
+    if (!dwg)           { skipped.noDwg++;  return; }
+    if (seen.has(name)) { skipped.dup++;    return; }  // ซ้ำในชุดเดียวกัน
+    seen.add(name);
+    valid.push(r);
+  });
+
+  return { valid, skipped };
+}
+
+function recordToday(planRows, fgRows) {
+  const now      = new Date();
+  const dateKey  = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const mLabel   = MONTH_TH[now.getMonth()] + ' ' + now.getFullYear();
+  const dLabel   = `${now.getDate()} ${MONTH_TH[now.getMonth()]} ${now.getFullYear()}`;
+  const ts       = now.toLocaleString('th-TH');
+
+  // ตรวจสอบข้อมูลก่อนบันทึก
+  const planCheck = validateRows(planRows);
+  const fgCheck   = validateRows(fgRows);
+
+  // แสดงผลการตรวจสอบ (ถ้ามีข้อมูลที่ถูก skip)
+  const totalSkip = planCheck.skipped.noName + planCheck.skipped.noDwg + planCheck.skipped.dup
+                  + fgCheck.skipped.noName   + fgCheck.skipped.noDwg   + fgCheck.skipped.dup;
+  if (totalSkip > 0) {
+    const el = document.getElementById('validateLog');
+    if (el) {
+      const lines = [];
+      if (planCheck.skipped.noName) lines.push(`แผนผลิต: ไม่มีชื่อ ${planCheck.skipped.noName} แถว`);
+      if (planCheck.skipped.noDwg)  lines.push(`แผนผลิต: ไม่มีเลข Dwg. ${planCheck.skipped.noDwg} แถว`);
+      if (planCheck.skipped.dup)    lines.push(`แผนผลิต: ชื่อซ้ำ ${planCheck.skipped.dup} แถว (ใช้ค่าล่าสุด)`);
+      if (fgCheck.skipped.noName)   lines.push(`FG: ไม่มีชื่อ ${fgCheck.skipped.noName} แถว`);
+      if (fgCheck.skipped.noDwg)    lines.push(`FG: ไม่มีเลข Dwg. ${fgCheck.skipped.noDwg} แถว`);
+      if (fgCheck.skipped.dup)      lines.push(`FG: ชื่อซ้ำ ${fgCheck.skipped.dup} แถว (ใช้ค่าล่าสุด)`);
+      el.innerHTML = `⚠️ กรองข้อมูลไม่สมบูรณ์: ${lines.join(' · ')}`;
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 8000);
+    }
+  }
+
+  // บันทึกเฉพาะแถวที่ผ่านการตรวจสอบ
+  const store = loadDailyStore();
+  store.days[dateKey] = {
+    dateKey, monthKey, mLabel, dLabel, ts,
+    planRows,   // เก็บ raw ไว้ด้วย (สำหรับ restore)
+    fgRows,
+    planValid: planCheck.valid,   // ข้อมูลที่ผ่านการตรวจสอบ
+    fgValid:   fgCheck.valid,
+    validateSummary: {
+      planOk: planCheck.valid.length, planSkip: planCheck.skipped,
+      fgOk:   fgCheck.valid.length,   fgSkip:   fgCheck.skipped
+    }
+  };
+  saveDailyStore(store);
+  updateSnapshotUI();
+}
+
+// ดึงข้อมูล valid ของวัน (fallback ไปใช้ raw ถ้าไม่มี planValid)
+function getDayValid(d) {
+  return {
+    planRows: d.planValid || filterData(d.planRows),
+    fgRows:   d.fgValid   || filterData(d.fgRows)
+  };
+}
+
+// ดึงบันทึกวันล่าสุด (ใช้เป็น fallback)
+function loadLatestRecord() {
+  const store = loadDailyStore();
+  const keys  = Object.keys(store.days).sort();
+  if (!keys.length) return null;
+  const d = store.days[keys[keys.length - 1]];
+  return { planRows: d.planRows, fgRows: d.fgRows, ts: d.ts };
+}
+
+// รวมข้อมูลรายเดือน → summary object (ใช้ข้อมูล valid เท่านั้น)
+function buildMonthlySummary(monthKey) {
+  const store = loadDailyStore();
+  const days  = Object.values(store.days)
+    .filter(d => d.monthKey === monthKey)
+    .sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+  if (!days.length) return null;
+
+  // timeline: { partName: { dateKey: { status, qty, machine } } }
+  const timeline = {};
+  days.forEach(d => {
+    const { planRows } = getDayValid(d);
+    planRows.forEach(r => {
+      const name = String(r[1]||'').trim();
+      if (!name) return;
+      if (!timeline[name]) timeline[name] = { dwg: String(r[2]||''), firstSeen: d.dateKey };
+      timeline[name][d.dateKey] = {
+        status:  String(r[5]||'').trim(),
+        qty:     toNum(r[3]),
+        machine: String(r[6]||'').trim()
+      };
+    });
+  });
+
+  // ยอดรวมที่ไม่ซ้ำ Part (ใช้ค่าล่าสุด)
+  const latestQty = {};
+  const firstSeen = {};
+  days.forEach(d => {
+    const { planRows } = getDayValid(d);
+    planRows.forEach(r => {
+      const name = String(r[1]||'').trim();
+      if (!name) return;
+      latestQty[name] = toNum(r[3]);
+      if (!firstSeen[name]) firstSeen[name] = d.dateKey;
+    });
+  });
+  const totalUniqQty   = Object.values(latestQty).reduce((a,b)=>a+b, 0);
+  const totalUniqParts = Object.keys(latestQty).length;
+
+  // Part ที่เพิ่ม/ออกแต่ละวัน
+  const newPartsByDay     = {};
+  const removedPartsByDay = {};
+  let prevParts = new Set();
+  days.forEach(d => {
+    const { planRows } = getDayValid(d);
+    const curParts = new Set(planRows.map(r=>String(r[1]||'').trim()).filter(Boolean));
+    newPartsByDay[d.dateKey]     = [...curParts].filter(p => !prevParts.has(p));
+    removedPartsByDay[d.dateKey] = [...prevParts].filter(p => !curParts.has(p));
+    prevParts = curParts;
+  });
+
+  // FG summary: ใช้ค่าล่าสุดต่อ Part + รวมยอดงานเสียสะสม
+  const fgSummary    = {};
+  const fgBadHistory = {}; // { partName: [ {dateKey, bad} ] } — ประวัติงานเสียรายวัน
+  days.forEach(d => {
+    const { fgRows } = getDayValid(d);
+    fgRows.forEach(r => {
+      const name = String(r[1]||'').trim();
+      if (!name) return;
+      const bad = toNum(r[5]);
+      fgSummary[name] = {
+        dwg: r[2]||'', ok: toNum(r[4]), bad, all: toNum(r[6]),
+        note: r[7]||'', ready: String(r[8]||'').toUpperCase()==='TRUE', ts: d.ts
+      };
+      if (!fgBadHistory[name]) fgBadHistory[name] = [];
+      if (bad > 0) fgBadHistory[name].push({ dateKey: d.dateKey, bad });
+    });
+  });
+
+  // รวมงานเสียทั้งหมดสะสมตลอดเดือน (ไม่ใช่แค่ค่าล่าสุด)
+  const totalBadAll = Object.values(fgBadHistory).reduce((a,arr) => {
+    // ใช้ค่าสูงสุดของแต่ละวัน (กันนับซ้ำถ้าข้อมูลไม่เปลี่ยน)
+    const maxBad = arr.length ? Math.max(...arr.map(x=>x.bad)) : 0;
+    return a + maxBad;
+  }, 0);
+
+  return { monthKey, days,
+    timeline, latestQty, firstSeen,
+    totalUniqQty, totalUniqParts,
+    newPartsByDay, removedPartsByDay,
+    fgSummary, fgBadHistory, totalBadAll };
+}
+
+// แสดง UI panel ประวัติ
+function updateSnapshotUI() {
+  const el = document.getElementById('snapshotList');
+  if (!el) return;
+
+  const store  = loadDailyStore();
+  const allKeys = Object.keys(store.days).sort().reverse();
+  if (!allKeys.length) {
+    el.innerHTML = '<p style="color:#aaa;font-size:12px;padding:8px 0">ยังไม่มีข้อมูลที่บันทึกไว้</p>';
+    return;
+  }
+
+  // group by month
+  const byMonth = {};
+  allKeys.forEach(k => {
+    const d = store.days[k];
+    if (!byMonth[d.monthKey]) byMonth[d.monthKey] = { mLabel: d.mLabel, days: [] };
+    byMonth[d.monthKey].days.push(d);
+  });
+
+  const monthKeys = Object.keys(byMonth).sort().reverse();
+  el.innerHTML = monthKeys.map((mk, mi) => {
+    const m    = byMonth[mk];
+    const days = m.days.sort((a,b) => b.dateKey.localeCompare(a.dateKey));
+    const dayRows = days.map((d, di) => `
+      <div style="display:flex;align-items:center;gap:6px;padding:4px 0 4px 12px;border-bottom:1px solid #f5f5f5">
+        <span style="font-size:11px;color:#888;width:90px">${d.dLabel}</span>
+        <span style="font-size:11px;color:#aaa;flex:1">${d.ts}</span>
+        <span style="font-size:11px;color:#555">${filterData(d.planRows).length} งาน</span>
+        <button onclick="viewDaySnapshot('${d.dateKey}')"
+          style="font-size:11px;padding:2px 8px;background:#f0f4ff;border:1px solid #c7d7fa;border-radius:5px;cursor:pointer;color:#185FA5">ดูวันนี้</button>
+      </div>`).join('');
+
+    return `
+    <div style="margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:${mi===0?'#f0fdf4':'#f8fafc'};cursor:pointer"
+           onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+        <span style="font-size:13px;font-weight:700;color:${mi===0?'#166534':'#185FA5'}">${mi===0?'📅':'📁'} ${m.mLabel}</span>
+        <span style="font-size:11px;color:#888">${days.length} วัน</span>
+        <span style="margin-left:auto;font-size:11px;color:#666">▾ ขยาย/ย่อ</span>
+        <button onclick="event.stopPropagation();viewMonthSummary('${mk}')"
+          style="font-size:11px;padding:3px 10px;background:${mi===0?'#166534':'#185FA5'};color:#fff;border:none;border-radius:5px;cursor:pointer">
+          📊 สรุปเดือน</button>
+        <button onclick="event.stopPropagation();if(confirm('ลบข้อมูลเดือน ${m.mLabel} ทั้งหมด?'))deleteMonthData('${mk}')"
+          style="font-size:11px;padding:3px 8px;background:#fff0f0;border:1px solid #fca5a5;border-radius:5px;cursor:pointer;color:#E24B4A">ลบ</button>
+      </div>
+      <div style="display:${mi===0?'block':'none'}">${dayRows}</div>
+    </div>`;
+  }).join('');
+}
+
+// ดูข้อมูลวันที่เลือก
+function viewDaySnapshot(dateKey) {
+  const store = loadDailyStore();
+  const d = store.days[dateKey];
+  if (!d) return;
+  renderPlan(d.planRows);
+  renderFG(d.fgRows);
+  document.getElementById('pageSubtitle').textContent = `แผนการผลิตงานพับ AGT · ${d.dLabel} (${d.ts})`;
+  setStatus(`📂 แสดงข้อมูลวันที่: ${d.dLabel}`, 'info');
+  document.getElementById('ts').textContent = d.ts;
+  document.getElementById('snapshotPanel').style.display = 'none';
+}
+
+// ดูสรุปรายเดือน — เปิด modal
+function viewMonthSummary(monthKey) {
+  const summary = buildMonthlySummary(monthKey);
+  if (!summary) return;
+
+  const { days, timeline, latestQty, firstSeen,
+          totalUniqQty, totalUniqParts,
+          newPartsByDay, removedPartsByDay,
+          fgSummary, fgBadHistory, totalBadAll } = summary;
+  const mLabel  = days[0].mLabel;
+  const dayKeys = days.map(d => d.dateKey).sort();
+
+  // ---- validate summary per day ----
+  const validateRows2 = days.map(d => {
+    const v = d.validateSummary;
+    if (!v) return '';
+    const issues = [];
+    if (v.planSkip.noName) issues.push(`ไม่มีชื่อ ${v.planSkip.noName}`);
+    if (v.planSkip.noDwg)  issues.push(`ไม่มี Dwg. ${v.planSkip.noDwg}`);
+    if (v.planSkip.dup)    issues.push(`ซ้ำ ${v.planSkip.dup}`);
+    return issues.length
+      ? `<span style="color:#E24B4A;font-size:10px">${issues.join(', ')}</span>`
+      : `<span style="color:#1D9E75;font-size:10px">✓ สมบูรณ์</span>`;
+  });
+
+  // ---- Summary Cards ----
+  const totalFgOk  = Object.values(fgSummary).reduce((a,v)=>a+v.ok, 0);
+  const totalFgAll = Object.values(fgSummary).reduce((a,v)=>a+v.all, 0);
+  const cardsHtml = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px">
+      <div style="background:#f0f4ff;border-radius:8px;padding:12px 14px">
+        <div style="font-size:11px;color:#6b7280;margin-bottom:2px">Part ทั้งหมด (ไม่ซ้ำ)</div>
+        <div style="font-size:26px;font-weight:800;color:#185FA5">${totalUniqParts}</div>
+        <div style="font-size:11px;color:#888">รายการ</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:12px 14px">
+        <div style="font-size:11px;color:#6b7280;margin-bottom:2px">ยอดรวม EA. (ค่าล่าสุด/Part)</div>
+        <div style="font-size:26px;font-weight:800;color:#1D9E75">${totalUniqQty.toLocaleString()}</div>
+        <div style="font-size:11px;color:#888">EA.</div>
+      </div>
+      <div style="background:#fef9c3;border-radius:8px;padding:12px 14px">
+        <div style="font-size:11px;color:#6b7280;margin-bottom:2px">วันที่บันทึก</div>
+        <div style="font-size:26px;font-weight:800;color:#B45309">${days.length}</div>
+        <div style="font-size:11px;color:#888">วัน</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:12px 14px">
+        <div style="font-size:11px;color:#6b7280;margin-bottom:2px">FG สำเร็จรวม</div>
+        <div style="font-size:26px;font-weight:800;color:#1D9E75">${totalFgOk.toLocaleString()}</div>
+        <div style="font-size:11px;color:#888">EA. / ${totalFgAll.toLocaleString()} รวม</div>
+      </div>
+      <div style="background:#fff0f0;border-radius:8px;padding:12px 14px;border:1px solid #fca5a5">
+        <div style="font-size:11px;color:#6b7280;margin-bottom:2px">งานเสียทั้งหมด</div>
+        <div style="font-size:26px;font-weight:800;color:#E24B4A">${totalBadAll.toLocaleString()}</div>
+        <div style="font-size:11px;color:#888">EA. · ${totalFgAll>0?((totalBadAll/totalFgAll)*100).toFixed(1):0}% ของรวม</div>
+      </div>
+    </div>`;
+
+  const noteHtml = `
+    <div style="background:#f0f4ff;border:1px solid #c7d7fa;border-radius:8px;padding:9px 14px;margin-bottom:12px;font-size:12px;color:#1e3a5f;line-height:1.8">
+      <b>💡 หลักการ</b> · Part ซ้ำในวันเดิม → ใช้ค่าล่าสุด · Part ไม่มีชื่อ/Dwg. → กรองออก · งานเสีย → ใช้ค่าสูงสุดของแต่ละวัน (ไม่บวกซ้ำ)
+    </div>`;
+
+  // ---- Timeline ----
+  const partNames = Object.keys(timeline).sort();
+  const colW = Math.max(44, Math.floor(500/(dayKeys.length+1)));
+  function stIcon(st) {
+    const map = {
+      'กำลังพับ':{ic:'🟢',bg:'#dbeafe'},'รอพับ':{ic:'🟡',bg:'#fef9c3'},
+      'หยุดชั่วคราว':{ic:'🔴',bg:'#fee2e2'},'F/A':{ic:'✅',bg:'#dcfce7'},
+      'กำลังอัด':{ic:'🔵',bg:'#e0f2fe'},'รออัด':{ic:'🟣',bg:'#ede9fe'},
+      'แก้ไข':{ic:'🔧',bg:'#fdf4ff'},'เสร็จแล้ว':{ic:'✔️',bg:'#f0fdf4'},'ส่งแล้ว':{ic:'📦',bg:'#ecfdf5'},
+    };
+    return map[st] || {ic:'–',bg:'#f9f9f9'};
+  }
+
+  const timelineHtml = `
+    <h3 style="font-size:13px;font-weight:700;color:#185FA5;margin:0 0 8px">📅 Timeline สถานะรายวัน</h3>
+    <div style="overflow-x:auto;margin-bottom:6px">
+    <table style="border-collapse:collapse;font-size:11px;min-width:100%">
+      <thead>
+        <tr style="background:#f0f4ff">
+          <th style="padding:6px 10px;text-align:left;border-bottom:2px solid #c7d7fa;min-width:160px;position:sticky;left:0;background:#f0f4ff;z-index:1">
+            Part Name <span style="font-weight:400;color:#888">(${partNames.length})</span>
+          </th>
+          ${dayKeys.map((k,ki) => {
+            const dd=k.split('-');
+            const nw=(newPartsByDay[k]||[]).length, rm=(removedPartsByDay[k]||[]).length;
+            return `<th style="padding:4px 2px;text-align:center;border-bottom:2px solid #c7d7fa;min-width:${colW}px">
+              <b>${parseInt(dd[2])}</b><br>
+              <span style="font-weight:400;color:#888;font-size:10px">${MONTH_TH[parseInt(dd[1])-1]}</span>
+              ${nw?`<br><span style="color:#1D9E75;font-size:10px;font-weight:700">+${nw}</span>`:''}
+              ${rm?`<span style="color:#E24B4A;font-size:10px;font-weight:700"> -${rm}</span>`:''}
+              <br>${validateRows2[ki]||''}
+            </th>`;
+          }).join('')}
+          <th style="padding:6px 8px;text-align:right;border-bottom:2px solid #c7d7fa;min-width:75px">EA. ล่าสุด</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${partNames.map((name,i) => {
+          const bg=i%2?'#fafafa':'#fff';
+          const isNew = firstSeen[name] !== dayKeys[0];
+          return `<tr style="background:${bg}">
+            <td style="padding:4px 10px;border-bottom:1px solid #efefef;position:sticky;left:0;background:${bg};z-index:1;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(name)}">
+              ${isNew?'<span style="color:#1D9E75;font-size:10px;margin-right:3px">★</span>':''}${esc(name)}
+            </td>
+            ${dayKeys.map(dk => {
+              const cell=(timeline[name]||{})[dk];
+              if(!cell) return `<td style="padding:3px;text-align:center;border-bottom:1px solid #f0f0f0;background:#f9f9f9;color:#ccc">–</td>`;
+              const {ic,bg:cbg}=stIcon(cell.status);
+              return `<td style="padding:3px 2px;text-align:center;border-bottom:1px solid #f0f0f0;background:${cbg}" title="${esc(cell.status)} · ${cell.qty} EA.">
+                ${ic}<br><span style="font-size:10px;color:#555">${cell.qty>0?cell.qty.toLocaleString():''}</span>
+              </td>`;
+            }).join('')}
+            <td style="padding:4px 8px;text-align:right;border-bottom:1px solid #efefef;font-weight:700;color:#185FA5">${(latestQty[name]||0).toLocaleString()}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+      <tfoot>
+        <tr style="background:#f0f4ff;font-weight:700;border-top:2px solid #c7d7fa">
+          <td style="padding:6px 10px;position:sticky;left:0;background:#f0f4ff">รวม (ไม่ซ้ำ Part)</td>
+          ${dayKeys.map(dk => {
+            const v = getDayValid(days.find(d=>d.dateKey===dk)||{planRows:[],fgRows:[]});
+            return `<td style="padding:6px 2px;text-align:center;font-size:11px;color:#555">${v.planRows.length} งาน</td>`;
+          }).join('')}
+          <td style="padding:6px 8px;text-align:right;color:#1D9E75">${totalUniqQty.toLocaleString()} EA.</td>
+        </tr>
+      </tfoot>
+    </table>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:11px;margin-bottom:4px">
+      <span>🟢 กำลังพับ</span><span>🟡 รอพับ</span><span>🔴 หยุด</span><span>✅ F/A</span>
+      <span>🔵 กำลังอัด</span><span>🟣 รออัด</span><span>🔧 แก้ไข</span>
+      <span style="color:#1D9E75"><b>+N/-N</b> Part เพิ่ม/ออก</span>
+      <span style="color:#1D9E75">★ Part ใหม่ในเดือน</span>
+    </div>`;
+
+  // ---- FG Table + งานเสีย ----
+  const fgEntries = Object.entries(fgSummary);
+  const fgHtml = fgEntries.length ? `
+    <h3 style="font-size:13px;font-weight:700;color:#1D9E75;margin:16px 0 8px">📦 Finished Good รายเดือน</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:#f0fdf4">
+        <th style="padding:5px 8px;text-align:left;border-bottom:1px solid #ddd">Part Name</th>
+        <th style="padding:5px 8px;text-align:right;border-bottom:1px solid #ddd">สำเร็จ (EA.)</th>
+        <th style="padding:5px 8px;text-align:right;border-bottom:1px solid #ddd;color:#E24B4A">เสีย (EA.)</th>
+        <th style="padding:5px 8px;text-align:right;border-bottom:1px solid #ddd;color:#E24B4A">%เสีย</th>
+        <th style="padding:5px 8px;text-align:right;border-bottom:1px solid #ddd">รวม (EA.)</th>
+        <th style="padding:5px 8px;border-bottom:1px solid #ddd">ประวัติงานเสีย</th>
+        <th style="padding:5px 8px;border-bottom:1px solid #ddd">พร้อมส่ง</th>
+      </tr></thead>
+      <tbody>
+        ${fgEntries.map(([n,v]) => {
+          const pct = v.all > 0 ? ((v.bad/v.all)*100).toFixed(1) : '0.0';
+          const hist = (fgBadHistory[n]||[]).map(h=>`${h.dateKey.slice(8)}/${h.dateKey.slice(5,7)}: ${h.bad}`).join(' · ');
+          return `<tr>
+            <td style="padding:4px 8px;border-bottom:1px solid #f5f5f5;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n)}</td>
+            <td style="padding:4px 8px;border-bottom:1px solid #f5f5f5;text-align:right;color:#1D9E75"><b>${v.ok.toLocaleString()}</b></td>
+            <td style="padding:4px 8px;border-bottom:1px solid #f5f5f5;text-align:right;font-weight:${v.bad>0?'700':'400'};color:${v.bad>0?'#E24B4A':'#aaa'}">${v.bad>0?v.bad.toLocaleString():'–'}</td>
+            <td style="padding:4px 8px;border-bottom:1px solid #f5f5f5;text-align:right">
+              <span style="font-size:11px;padding:1px 5px;border-radius:3px;background:${parseFloat(pct)>5?'#fee2e2':parseFloat(pct)>0?'#fff8e1':'#f0f0f0'};color:${parseFloat(pct)>5?'#E24B4A':parseFloat(pct)>0?'#B45309':'#aaa'}">${pct}%</span>
+            </td>
+            <td style="padding:4px 8px;border-bottom:1px solid #f5f5f5;text-align:right"><b>${v.all.toLocaleString()}</b></td>
+            <td style="padding:4px 8px;border-bottom:1px solid #f5f5f5;font-size:10px;color:#888;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${hist}">${hist||'–'}</td>
+            <td style="padding:4px 8px;border-bottom:1px solid #f5f5f5"><span style="font-size:11px;padding:2px 6px;border-radius:4px;background:${v.ready?'#dcfce7':'#f5f5f5'};color:${v.ready?'#166534':'#888'}">${v.ready?'✓ พร้อม':'รอ'}</span></td>
+          </tr>`;
+        }).join('')}
+        <tr style="background:#fff0f0;font-weight:700;border-top:2px solid #fca5a5">
+          <td style="padding:5px 8px">รวมทั้งหมด</td>
+          <td style="padding:5px 8px;text-align:right;color:#1D9E75">${fgEntries.reduce((a,[,v])=>a+v.ok,0).toLocaleString()}</td>
+          <td style="padding:5px 8px;text-align:right;color:#E24B4A"><b>${totalBadAll.toLocaleString()}</b></td>
+          <td style="padding:5px 8px;text-align:right">
+            <span style="font-size:11px;padding:1px 5px;border-radius:3px;background:#fee2e2;color:#E24B4A">
+              ${totalFgAll>0?((totalBadAll/totalFgAll)*100).toFixed(1):0}%
+            </span>
+          </td>
+          <td style="padding:5px 8px;text-align:right">${fgEntries.reduce((a,[,v])=>a+v.all,0).toLocaleString()}</td>
+          <td colspan="2"></td>
+        </tr>
+      </tbody>
+    </table>` : '<p style="color:#aaa;font-size:12px;margin-top:12px">ยังไม่มีข้อมูล Finished Good</p>';
+
+  // ---- Modal ----
+  let modal = document.getElementById('monthModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'monthModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto';
+    modal.onclick = e => { if(e.target===modal) modal.remove(); };
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:14px;padding:24px;width:100%;max-width:940px;position:relative;margin:auto">
+      <button onclick="document.getElementById('monthModal').remove()"
+        style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#aaa">✕</button>
+      <h2 style="font-size:17px;font-weight:800;color:#1F4E79;margin-bottom:2px">📊 สรุปรายเดือน — ${mLabel}</h2>
+      <p style="font-size:12px;color:#888;margin-bottom:14px">ข้อมูลจาก ${days.length} วัน · ${dayKeys[0]} ถึง ${dayKeys[dayKeys.length-1]}</p>
+      ${cardsHtml}
+      ${noteHtml}
+      ${timelineHtml}
+      ${fgHtml}
+    </div>`;
+}
+
+function deleteMonthData(monthKey) {
+  const store = loadDailyStore();
+  Object.keys(store.days).forEach(k => { if(store.days[k].monthKey===monthKey) delete store.days[k]; });
+  saveDailyStore(store);
+  updateSnapshotUI();
+}
+
+// backward compat — เรียกจาก loadAll
+function saveEmbedded(planRows, fgRows) { recordToday(planRows, fgRows); }
+function loadEmbedded() { return loadLatestRecord(); }
+
+/* ========== DB Functions ========== */
+function getDbUrl() {
+  return localStorage.getItem(STORAGE_KEY_DB) || '';
+}
+
+function saveDbUrl() {
+  const v = document.getElementById('dbUrlInput').value.trim();
+  if (!v || !v.startsWith('https://script.google.com')) {
+    alert('URL ไม่ถูกต้อง');
+    return;
+  }
+  localStorage.setItem(STORAGE_KEY_DB, v);
+  document.getElementById('dbBanner').style.display = 'none';
+  document.getElementById('dbSaveBtn').style.display = 'inline-flex';
+  setDbStatus('✅ บันทึก DB URL แล้ว');
+  alert('✅ บันทึก URL สำหรับ DB เรียบร้อย');
+}
+
+function showDbSetup() {
+  document.getElementById('dbBanner').style.display = 'block';
+  document.getElementById('dbUrlInput').value = getDbUrl() || '';
+}
+
+function setDbStatus(msg) {
+  const el = document.getElementById('dbStatusEl');
+  if (el) el.textContent = msg;
+}
+
+function hashRows(rows) {
+  return JSON.stringify(rows).length + '_' + (rows && rows[2] ? JSON.stringify(rows[2]) : '');
+}
+
+function buildMonthlySnapshot(planRows) {
+  const data = filterData(planRows);
+  const now = new Date();
+  const ts = now.toLocaleString('th-TH');
+  const dateTH = now.toLocaleDateString('th-TH');
+
+  const byStatus = {};
+  let totalQty = 0;
+  data.forEach(r => {
+    const st = String(r[5] || '').trim() || 'ไม่ระบุ';
+    byStatus[st] = (byStatus[st] || 0) + 1;
+    totalQty += toNum(r[3]);
+  });
+
+  const byMachine = {};
+  data.forEach(r => {
+    const m = String(r[6] || '').trim() || 'ไม่ระบุ';
+    if (!byMachine[m]) byMachine[m] = { count: 0, qty: 0 };
+    byMachine[m].count++;
+    byMachine[m].qty += toNum(r[3]);
+  });
+
+  const byMonth = {};
+  data.forEach(r => {
+    const dt = parseDate(r[8]) || parseDate(r[7]);
+    if (!dt) return;
+    const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
+    const label = `${MONTH_TH[dt.getMonth()]} ${dt.getFullYear()}`;
+    if (!byMonth[key]) byMonth[key] = { label, count: 0, qty: 0 };
+    byMonth[key].count++;
+    byMonth[key].qty += toNum(r[3]);
+  });
+
+  const rows = [];
+  rows.push([`=== Snapshot บันทึกเมื่อ: ${ts} ===`, '', '', '', '', '', '', '', '', '', '']);
+  rows.push(['ลำดับ', 'Part Name', 'Dwg.', 'จำนวน (EA.)', 'อัพเดท', 'สถานะ', 'เครื่องพับ', 'วันเริ่ม', 'วันคาดเสร็จ', 'หมายเหตุ', 'วันรับเข้า']);
+
+  data.forEach(r => {
+    rows.push([
+      r[0] || '', String(r[1] || '').trim(), r[2] || '',
+      toNum(r[3]), fmtDate(r[4]), String(r[5] || '').trim(),
+      String(r[6] || '').trim(), fmtDate(r[7]), fmtDate(r[8]),
+      r[9] || '', fmtDate(r[10])
+    ]);
+  });
+
+  rows.push(['']);
+  rows.push(['=== สรุปสถานะ ===']);
+  rows.push(['สถานะ', 'จำนวนรายการ']);
+  Object.entries(byStatus).forEach(([k, v]) => rows.push([k, v]));
+  rows.push(['รายการทั้งหมด', data.length, 'ยอดรวม (EA.)', totalQty]);
+
+  rows.push(['']);
+  rows.push(['=== สรุปรายเครื่องพับ ===']);
+  rows.push(['เครื่องพับ', 'รายการ', 'EA.']);
+  Object.entries(byMachine).sort((a, b) => b[1].qty - a[1].qty).forEach(([m, v]) => rows.push([m, v.count, v.qty]));
+
+  rows.push(['']);
+  rows.push(['=== สรุปรายเดือน (จากวันคาดเสร็จ) ===']);
+  rows.push(['เดือน', 'รายการ', 'EA.', 'เฉลี่ย/รายการ']);
+  Object.keys(byMonth).sort().forEach(k => {
+    const v = byMonth[k];
+    rows.push([v.label, v.count, v.qty, v.count > 0 ? Math.round(v.qty / v.count) : 0]);
+  });
+
+  rows.push(['']);
+  rows.push([`--- บันทึกเมื่อ: ${ts} | วันที่: ${dateTH} ---`]);
+  rows.push(['']);
+
+  return rows;
+}
+
+async function autoSaveToDB(planRows) {
+  const dbUrl = getDbUrl();
+  if (!dbUrl) return;
+  const h = hashRows(planRows);
+  // บันทึกถ้าข้อมูลเปลี่ยน หรือยังไม่ได้บันทึกในนาทีนี้
+  const nowMin = new Date().getMinutes();
+  if (h === lastSavedHash && nowMin === lastAutoSaveMinute) return;
+  lastSavedHash = h;
+  lastAutoSaveMinute = nowMin;
+  await _postToDB(planRows, false);
+}
+
+async function manualSaveToDB() {
+  if (!lastPlanRows) {
+    alert('ยังไม่มีข้อมูลแผนผลิต กรุณา Refresh ก่อน');
+    return;
+  }
+  const dbUrl = getDbUrl();
+  if (!dbUrl) {
+    showDbSetup();
+    return;
+  }
+  const btn = document.getElementById('dbSaveBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังบันทึก...';
+  const ok = await _postToDB(lastPlanRows, true);
+  btn.disabled = false;
+  btn.innerHTML = '💾 บันทึก DB';
+  if (ok) alert('✅ บันทึกลงฐานข้อมูลเรียบร้อยแล้ว');
+  else alert('❌ บันทึกไม่สำเร็จ กรุณาตรวจสอบ DB URL');
+}
+
+async function _postToDB(planRows, showAlert) {
+  const dbUrl = getDbUrl();
+  if (!dbUrl) return false;
+  const rows = buildMonthlySnapshot(planRows);
+  try {
+    const resp = await fetch(dbUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        sheet: SHEET_DB,
+        action: 'append',
+        rows: rows
+      })
+    });
+    const text = await resp.text();
+    const json = JSON.parse(text.replace(/^\uFEFF/, ''));
+    if (json.ok) {
+      const now = new Date().toLocaleString('th-TH');
+      setDbStatus(`🗄️ DB บันทึกล่าสุด: ${now}`);
+      return true;
+    } else {
+      console.error('DB error:', json.error);
+      return false;
+    }
+  } catch (err) {
+    console.error('DB post failed:', err);
+    return false;
+  }
+}
+
+function updateCacheInfo() {
+  const t = localStorage.getItem(CACHE_KEY_TS);
+  const el = document.getElementById('cacheInfo');
+  if (el && t) el.textContent = '💾 snapshot: ' + t;
+}
+
+/* ========== Load All Data ========== */
+function loadAll() {
+  const url = getUrl();
+  if (!url) {
+    document.getElementById('setupBanner').style.display = 'block';
+    // ลำดับ fallback: embedded (ดึงจากชีตจริงครั้งล่าสุด) → cache → hardcode
+    const embedded = loadEmbedded();
+    const cache    = loadCache();
+    const src      = embedded || cache;
+    if (src) {
+      renderPlan(src.planRows);
+      renderFG(src.fgRows);
+      document.getElementById('pageSubtitle').textContent = `แผนการผลิตงานพับ AGT · (snapshot ${src.ts})`;
+      setStatus('ยังไม่ได้ตั้งค่า URL — แสดงข้อมูล snapshot ล่าสุด (' + src.ts + ')', 'warn');
+      document.getElementById('ts').textContent = 'snapshot: ' + src.ts;
+    } else {
+      renderPlan(PLAN_FALLBACK);
+      renderFG(FG_FALLBACK);
+      document.getElementById('pageSubtitle').textContent = 'แผนการผลิตงานพับ AGT · (ข้อมูลสำรองจาก CSV)';
+      setStatus('ยังไม่ได้ตั้งค่า Apps Script URL — กดปุ่ม "⚙️ ตั้งค่า URL"', 'warn');
+      document.getElementById('ts').textContent = 'ข้อมูล ณ 12/06/2569';
+    }
+    return;
+  }
+
+  setStatus('🔄 กำลังดึงข้อมูลใหม่...', 'info');
+
+  Promise.all([
+    fetchSheet(url, SHEET_PLAN),
+    fetchSheet(url, SHEET_FG)
+  ])
+    .then(([planRows, fgRows]) => {
+      lastPlanRows = planRows;
+      lastFgRows   = fgRows;
+      saveCache(planRows, fgRows);       // short-term cache (อาจล้างได้)
+      saveEmbedded(planRows, fgRows);    // long-term embedded (ไม่หายแม้ชีตถูกลบ)
+      autoSaveToDB(planRows);            // บันทึกลง DB sheet อัตโนมัติ
+      renderPlan(planRows);
+      renderFG(fgRows);
+      const now = new Date().toLocaleString('th-TH');
+      document.getElementById('pageSubtitle').textContent = `แผนการผลิตงานพับ AGT · อัปเดต ${now}`;
+      setStatus(`✅ โหลดสำเร็จ – บันทึก snapshot แล้ว · แผนผลิต ${planRows.length} แถว · FG ${fgRows.length} แถว`, 'ok');
+      document.getElementById('ts').textContent = `อัปเดตล่าสุด ${new Date().toLocaleTimeString('th-TH')}`;
+    })
+    .catch(err => {
+      console.error(err);
+      // fallback: embedded → cache → hardcode
+      const embedded = loadEmbedded();
+      const cache    = loadCache();
+      const src      = embedded || cache;
+      if (src) {
+        renderPlan(src.planRows);
+        renderFG(src.fgRows);
+        document.getElementById('pageSubtitle').textContent = `แผนการผลิตงานพับ AGT · (snapshot ${src.ts})`;
+        setStatus('⚠️ ดึงข้อมูลใหม่ไม่ได้ — แสดงข้อมูล snapshot ล่าสุด (' + src.ts + ')', 'warn');
+        document.getElementById('ts').textContent = 'snapshot: ' + src.ts;
+      } else {
+        renderPlan(PLAN_FALLBACK);
+        renderFG(FG_FALLBACK);
+        document.getElementById('pageSubtitle').textContent = 'แผนการผลิตงานพับ AGT · (ข้อมูลสำรองจาก CSV)';
+        setStatus('⚠️ ดึงข้อมูลไม่ได้และไม่มี snapshot — ใช้ข้อมูลสำรองแทน', 'warn');
+        document.getElementById('ts').textContent = 'ข้อมูล ณ 12/06/2569';
+      }
+    });
+}
+
+/* ========== Export PDF ========== */
+async function exportPDF() {
+  const btn = document.getElementById('pdfBtn');
+  const origText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ กำลังสร้าง PDF...';
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const margin = 10;
+    const contentW = pageW - margin * 2;
+
+    const topbar = document.querySelector('.topbar');
+    const statusBar = document.getElementById('statusBar');
+    const setupBanner = document.getElementById('setupBanner');
+    const tabs = document.querySelector('.tabs');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    topbar.style.display = 'none';
+    statusBar.style.display = 'none';
+    setupBanner.style.display = 'none';
+    tabs.style.display = 'none';
+    panels.forEach(p => { p.style.display = 'block'; p.classList.add('active'); });
+
+    const canvas = await html2canvas(document.body, {
+      scale: 1.5,
+      useCORS: true,
+      backgroundColor: '#f0f2f5',
+      scrollY: 0,
+      windowWidth: document.body.scrollWidth,
+      windowHeight: document.body.scrollHeight
+    });
+
+    topbar.style.display = '';
+    statusBar.style.display = '';
+    tabs.style.display = '';
+    panels.forEach((p, i) => {
+      p.style.display = '';
+      if (i !== 0) p.classList.remove('active');
+    });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+    const imgW = contentW;
+    const imgH = (canvas.height / canvas.width) * imgW;
+
+    let yPos = margin;
+    let remainH = imgH;
+    let srcY = 0;
+    const pageContentH = pageH - margin * 2;
+
+    pdf.setFontSize(9);
+    pdf.setTextColor(150);
+
+    let pageNum = 1;
+    while (remainH > 0) {
+      const sliceH = Math.min(remainH, pageContentH);
+      const sliceCanvas = document.createElement('canvas');
+      const ratio = canvas.width / imgW;
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = sliceH * ratio;
+      const ctx = sliceCanvas.getContext('2d');
+      ctx.drawImage(canvas, 0, srcY * ratio, canvas.width, sliceH * ratio, 0, 0, canvas.width, sliceH * ratio);
+
+      if (pageNum > 1) pdf.addPage();
+      pdf.addImage(sliceCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', margin, margin, imgW, sliceH);
+
+      pdf.setFontSize(8);
+      pdf.setTextColor(180);
+      pdf.text(`Dashboard AGT Bending Process  |  ${new Date().toLocaleString('th-TH')}`, margin, pageH - 4);
+      pdf.text(`หน้า ${pageNum}`, pageW - margin, pageH - 4, { align: 'right' });
+
+      srcY += sliceH;
+      remainH -= sliceH;
+      pageNum++;
+    }
+
+    const dateStr = new Date().toLocaleDateString('th-TH').replace(/\//g, '-');
+    pdf.save(`AGT_Dashboard_${dateStr}.pdf`);
+
+  } catch (err) {
+    alert('เกิดข้อผิดพลาด: ' + err.message);
+    console.error(err);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = origText;
+}
+
+/* ========== Auto-Refresh ========== */
+let autoTimer = null;
+let countdownTimer = null;
+let secondsLeft = 0;
+
+function toggleAuto() {
+  const on = document.getElementById('autoChk').checked;
+  document.getElementById('intervalSel').style.display = on ? 'inline-block' : 'none';
+  document.getElementById('countdownBadge').style.display = on ? 'inline-block' : 'none';
+  if (on) {
+    startAuto();
+  } else {
+    stopAuto();
+  }
+}
+
+function changeInterval() {
+  if (document.getElementById('autoChk').checked) {
+    startAuto();
+  }
+}
+
+function startAuto() {
+  stopAuto();
+  const secs = parseInt(document.getElementById('intervalSel').value);
+  secondsLeft = secs;
+  updateCountdown();
+  autoTimer = setInterval(() => {
+    loadAll();
+    secondsLeft = secs;
+  }, secs * 1000);
+  countdownTimer = setInterval(() => {
+    secondsLeft--;
+    if (secondsLeft < 0) secondsLeft = 0;
+    updateCountdown();
+  }, 1000);
+}
+
+function stopAuto() {
+  clearInterval(autoTimer);
+  clearInterval(countdownTimer);
+  autoTimer = null;
+  countdownTimer = null;
+  document.getElementById('countdownBadge').textContent = '';
+}
+
+function updateCountdown() {
+  const badge = document.getElementById('countdownBadge');
+  const m = Math.floor(secondsLeft / 60);
+  const s = secondsLeft % 60;
+  badge.textContent = '🔄 อีก ' + (m > 0 ? m + 'm ' : '') + String(s).padStart(2, '0') + 's';
+}
+
+function toggleSnapshotPanel() {
+  const p = document.getElementById('snapshotPanel');
+  const show = p.style.display === 'none';
+  p.style.display = show ? 'block' : 'none';
+  if (show) updateSnapshotUI();
+}
+
+/* =================================================================
+   EXPORT / IMPORT SNAPSHOT — ย้ายประวัติไปเครื่องใหม่
+   รวมทั้ง agt_daily_store_v1 (Plan/FG) และ agt_fix_daily_v1 (Fix Stock)
+   ลงไฟล์ .json เดียว เพื่อนำไป import ที่เครื่องอื่นได้
+================================================================= */
+function exportSnapshotFile() {
+  try {
+    const payload = {
+      type: 'agt_dashboard_snapshot_export',
+      exportedAt: new Date().toLocaleString('th-TH'),
+      planFg: JSON.parse(localStorage.getItem(DAILY_STORE_KEY) || '{"days":{}}'),
+      fix: JSON.parse(localStorage.getItem(FIX_DAILY_KEY) || '{"days":{}}')
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dateStr = new Date().toLocaleDateString('th-TH').replace(/\//g, '-');
+    a.href = url;
+    a.download = `agt_snapshot_export_${dateStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('เกิดข้อผิดพลาดตอนดาวน์โหลด: ' + e.message);
+    console.error(e);
+  }
+}
+
+function importSnapshotFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      if (!payload || payload.type !== 'agt_dashboard_snapshot_export') {
+        alert('❌ ไฟล์นี้ไม่ใช่ไฟล์ export ประวัติ snapshot ที่ถูกต้อง');
+        return;
+      }
+
+      // merge Plan/FG: ข้อมูลใหม่ทับวันที่ซ้ำ ส่วนวันอื่นที่มีอยู่แล้วไม่หาย
+      const curPlanFg = loadDailyStore();
+      const incomingDays = (payload.planFg && payload.planFg.days) || {};
+      Object.keys(incomingDays).forEach(k => { curPlanFg.days[k] = incomingDays[k]; });
+      saveDailyStore(curPlanFg);
+
+      // merge Fix
+      const curFix = JSON.parse(localStorage.getItem(FIX_DAILY_KEY) || '{"days":{}}');
+      const incomingFix = (payload.fix && payload.fix.days) || {};
+      Object.keys(incomingFix).forEach(k => { curFix.days[k] = incomingFix[k]; });
+      localStorage.setItem(FIX_DAILY_KEY, JSON.stringify(curFix));
+
+      updateSnapshotUI();
+      document.getElementById('importSnapshotInput').value = '';
+      alert(`✅ นำเข้าประวัติสำเร็จ\nแผนผลิต/FG: ${Object.keys(incomingDays).length} วัน\nFix Stock: ${Object.keys(incomingFix).length} วัน`);
+    } catch (err) {
+      alert('❌ อ่านไฟล์ไม่สำเร็จ: ' + err.message);
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* =================================================================
+   FIX STOCK — สต๊อกงานแก้ไข
+================================================================= */
+const FIX_DAILY_KEY = 'agt_fix_daily_v1';
+let fixBarInst = null, fixPieInst = null, fixLineInst = null;
+let allFixRows = [];  // เก็บข้อมูลทั้งหมดสำหรับ filter
+
+function getFixUrl() { return localStorage.getItem(STORAGE_KEY_FIX) || ''; }
+
+function saveFixUrl() {
+  const v = document.getElementById('fixUrlInput').value.trim();
+  if (!v || !v.startsWith('https://script.google.com')) { alert('URL ไม่ถูกต้อง'); return; }
+  localStorage.setItem(STORAGE_KEY_FIX, v);
+  document.getElementById('fixBanner').style.display = 'none';
+  loadFix(true);
+}
+
+function showFixSetup() {
+  document.getElementById('fixBanner').style.display = 'block';
+  document.getElementById('fixUrlInput').value = getFixUrl();
+}
+
+// บันทึก snapshot รายวัน (แยก key จากแผนผลิต)
+function saveFixSnapshot(rows) {
+  const now     = new Date();
+  const dateKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const ts      = now.toLocaleString('th-TH');
+  try {
+    const store = JSON.parse(localStorage.getItem(FIX_DAILY_KEY) || '{"days":{}}');
+    store.days[dateKey] = { dateKey, ts, rows };
+    // เก็บสูงสุด 180 วัน
+    const keys = Object.keys(store.days).sort();
+    if (keys.length > 180) keys.slice(0, keys.length - 180).forEach(k => delete store.days[k]);
+    localStorage.setItem(FIX_DAILY_KEY, JSON.stringify(store));
+    document.getElementById('fixSnapshotInfo').textContent = `💾 บันทึก snapshot วันที่ ${dateKey} · ${ts}`;
+  } catch(e) { console.warn('saveFixSnapshot:', e); }
+}
+
+function loadFixFallback() {
+  try {
+    const store = JSON.parse(localStorage.getItem(FIX_DAILY_KEY) || '{"days":{}}');
+    const keys  = Object.keys(store.days).sort();
+    if (!keys.length) return null;
+    const last = store.days[keys[keys.length - 1]];
+    return { rows: last.rows, ts: last.ts };
+  } catch(e) { return null; }
+}
+
+function filterFixData(rows) {
+  if (!rows || !rows.length) return [];
+  // หา header row (มีคอลัมน์ "Part Name")
+  let start = 0;
+  for (let i = 0; i < Math.min(rows.length, 5); i++) {
+    if (String(rows[i][1]||'').includes('Part') || String(rows[i][0]||'').includes('ลำดับ')) {
+      start = i + 1; break;
+    }
+  }
+  return rows.slice(start).filter(r => r[1] && String(r[1]).trim() !== '');
+}
+
+async function loadFix(force) {
+  const url = getFixUrl();
+  if (!url) {
+    document.getElementById('fixBanner').style.display = 'block';
+    const fb = loadFixFallback();
+    if (fb) { renderFix(fb.rows); document.getElementById('fixSnapshotInfo').textContent = `📂 snapshot: ${fb.ts}`; }
+    return;
+  }
+  setStatus('🔄 กำลังดึงข้อมูลงานแก้ไข...', 'info');
+  try {
+    const rows = await fetchSheet(url, SHEET_FIX);
+    lastFixRows = rows;
+    saveFixSnapshot(rows);
+    renderFix(rows);
+    setStatus(`✅ โหลดข้อมูลงานแก้ไขสำเร็จ · ${filterFixData(rows).length} รายการ`, 'ok');
+  } catch(e) {
+    const fb = loadFixFallback();
+    if (fb) {
+      renderFix(fb.rows);
+      setStatus('⚠️ ดึงข้อมูลงานแก้ไขไม่ได้ — ใช้ snapshot ล่าสุด', 'warn');
+      document.getElementById('fixSnapshotInfo').textContent = `📂 snapshot: ${fb.ts}`;
+    } else {
+      setStatus('❌ ดึงข้อมูลงานแก้ไขไม่ได้', 'err');
+    }
+  }
+}
+
+function renderFix(rows) {
+  const data = filterFixData(rows);
+  allFixRows = data;
+
+  // ---- KPI ----
+  const totalQty  = data.reduce((a,r) => a + toNum(r[3]), 0);
+  const uniqParts = new Set(data.map(r => String(r[1]||'').trim())).size;
+  const dates     = data.map(r => fmtDate(r[4])).filter(Boolean).sort();
+  const lastDate  = dates[dates.length - 1] || '–';
+  document.getElementById('xk1').textContent = data.length.toLocaleString();
+  document.getElementById('xk2').textContent = totalQty.toLocaleString();
+  document.getElementById('xk3').textContent = uniqParts.toLocaleString();
+  document.getElementById('xk4').textContent = lastDate;
+
+  // ---- รวมยอดต่อ Part (ไม่ซ้ำ) ----
+  const byPart = {};
+  data.forEach(r => {
+    const name = String(r[1]||'').trim();
+    if (!name) return;
+    byPart[name] = (byPart[name] || 0) + toNum(r[3]);
+  });
+  const partNames  = Object.keys(byPart).sort((a,b) => byPart[b] - byPart[a]);
+  const partQtys   = partNames.map(n => byPart[n]);
+  const fixColors  = genColors(partNames.length);
+
+  // ---- Bar Chart ----
+  if (fixBarInst) fixBarInst.destroy();
+  fixBarInst = new Chart(document.getElementById('fixBarChart'), {
+    type: 'bar',
+    data: {
+      labels: partNames.map(n => n.length > 18 ? n.slice(0,17)+'…' : n),
+      datasets: [{ data: partQtys, backgroundColor: fixColors, borderWidth: 0, borderRadius: 5 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { font: { size: 11 } } }, x: { ticks: { font: { size: 10 }, maxRotation: 35 } } }
+    }
+  });
+
+  // ---- Pie Chart ----
+  const totalP = partQtys.reduce((a,b) => a+b, 0);
+  if (fixPieInst) fixPieInst.destroy();
+  fixPieInst = new Chart(document.getElementById('fixPieChart'), {
+    type: 'doughnut',
+    data: { labels: partNames, datasets: [{ data: partQtys, backgroundColor: fixColors, borderWidth: 2, borderColor: '#fff' }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '55%',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw.toLocaleString()} EA. (${totalP>0?Math.round(ctx.raw/totalP*100):0}%)` } } }
+    }
+  });
+  document.getElementById('fixPieLeg').innerHTML = partNames.map((n,i) => {
+    const pct = totalP > 0 ? Math.round(partQtys[i]/totalP*100) : 0;
+    return `<span class="li"><span class="ld" style="background:${fixColors[i]}"></span>${n.length>18?n.slice(0,17)+'…':n} ${pct}%</span>`;
+  }).join('');
+
+  // ---- Line Chart — สะสมรายวัน ----
+  const byDate = {};
+  data.forEach(r => {
+    const d = fmtDate(r[4]) || '–';
+    byDate[d] = (byDate[d] || 0) + toNum(r[3]);
+  });
+  const sortedDates = Object.keys(byDate).filter(d=>d!=='–').sort((a,b)=>{
+    const pa=a.split('/'), pb=b.split('/');
+    return new Date(2000+parseInt(pa[2]),parseInt(pa[1])-1,parseInt(pa[0])) - new Date(2000+parseInt(pb[2]),parseInt(pb[1])-1,parseInt(pb[0]));
+  });
+  let cum = 0;
+  const cumData = sortedDates.map(d => { cum += byDate[d]; return cum; });
+  const barData = sortedDates.map(d => byDate[d]);
+
+  if (fixLineInst) fixLineInst.destroy();
+  fixLineInst = new Chart(document.getElementById('fixLineChart'), {
+    type: 'bar',
+    data: {
+      labels: sortedDates,
+      datasets: [
+        { type: 'line', label: 'สะสม (EA.)', data: cumData, borderColor: '#E24B4A', backgroundColor: 'rgba(226,75,74,.08)', tension: 0.3, pointRadius: 4, yAxisID: 'yCum' },
+        { label: 'รับเข้าวันนี้ (EA.)', data: barData, backgroundColor: 'rgba(185,90,48,.6)', borderRadius: 4, yAxisID: 'yBar' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { font: { size: 11 } } } },
+      scales: {
+        x: { ticks: { font: { size: 10 }, maxRotation: 35 } },
+        yCum: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { font: { size: 10 } }, title: { display: true, text: 'สะสม', font: { size: 10 } } },
+        yBar: { position: 'left',  beginAtZero: true, ticks: { font: { size: 10 } }, title: { display: true, text: 'รายวัน', font: { size: 10 } } }
+      }
+    }
+  });
+
+  // ---- Table ----
+  renderFixTable(data);
+}
+
+function renderFixTable(data) {
+  const tbody = document.getElementById('fixTbl');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px">ไม่มีข้อมูล</td></tr>';
+    return;
+  }
+  const fixColors = genColors(data.length);
+  tbody.innerHTML = data.map((r, i) => `
+    <tr>
+      <td>${esc(r[0])}</td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r[1])}">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${fixColors[i]};margin-right:5px;vertical-align:middle"></span>${esc(String(r[1]||'').trim())}
+      </td>
+      <td style="white-space:nowrap">${esc(r[2]||'')}</td>
+      <td class="num"><b>${toNum(r[3]).toLocaleString()}</b></td>
+      <td style="white-space:nowrap">${fmtDate(r[4])}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r[5])}">${esc(r[5]||'–')}</td>
+    </tr>`).join('');
+}
+
+function filterFixTable() {
+  const q = document.getElementById('fixSearch').value.toLowerCase();
+  if (!q) { renderFixTable(allFixRows); return; }
+  const filtered = allFixRows.filter(r =>
+    [r[1],r[2],r[5]].some(v => String(v||'').toLowerCase().includes(q))
+  );
+  renderFixTable(filtered);
+}
+
+/* ========== Initialization ========== */
+updateCacheInfo();
+if (getDbUrl()) document.getElementById('dbSaveBtn').style.display = 'inline-flex';
+updateSnapshotUI();
+loadAll();
+</script>
+
+</body>
+</html>
