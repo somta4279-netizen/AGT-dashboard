@@ -571,10 +571,14 @@
     <span style="font-size:11px;color:#888">บันทึกอัตโนมัติทุกครั้งที่รีเฟรช · เก็บสูงสุด 24 เดือน</span>
   </div>
   <div id="snapshotList" style="max-height:260px;overflow-y:auto"></div>
-  <div style="margin-top:10px;display:flex;gap:8px">
+  <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
     <button onclick="loadAll()" style="font-size:12px;padding:5px 14px;background:#dbeafe;border:1px solid #93c5fd;border-radius:6px;cursor:pointer;color:#1e40af">↻ โหลดข้อมูลล่าสุดจากชีต</button>
+    <button onclick="exportSnapshotFile()" style="font-size:12px;padding:5px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;cursor:pointer;color:#166534">⬇️ ดาวน์โหลดประวัติ (ย้ายเครื่องใหม่)</button>
+    <button onclick="document.getElementById('importSnapshotInput').click()" style="font-size:12px;padding:5px 14px;background:#fff7ed;border:1px solid #fdba74;border-radius:6px;cursor:pointer;color:#9a3412">⬆️ นำเข้าประวัติ</button>
+    <input type="file" id="importSnapshotInput" accept="application/json" style="display:none" onchange="importSnapshotFile(this.files[0])">
     <button onclick="if(confirm('ลบประวัติ snapshot ทั้งหมด?')){localStorage.removeItem(DAILY_STORE_KEY);updateSnapshotUI();}" style="font-size:12px;padding:5px 14px;background:#fff0f0;border:1px solid #fca5a5;border-radius:6px;cursor:pointer;color:#E24B4A">🗑 ลบประวัติทั้งหมด</button>
   </div>
+  <p style="font-size:11px;color:#aaa;margin-top:8px">💡 ย้ายประวัติไปเครื่องใหม่: กด "ดาวน์โหลดประวัติ" ที่เครื่องเดิม → ส่งไฟล์ไปเครื่องใหม่ → เปิดเว็บที่เครื่องใหม่แล้วกด "นำเข้าประวัติ"</p>
 
   </div>
 </div>
@@ -2495,6 +2499,69 @@ function toggleSnapshotPanel() {
   const show = p.style.display === 'none';
   p.style.display = show ? 'block' : 'none';
   if (show) updateSnapshotUI();
+}
+
+/* =================================================================
+   EXPORT / IMPORT SNAPSHOT — ย้ายประวัติไปเครื่องใหม่
+   รวมทั้ง agt_daily_store_v1 (Plan/FG) และ agt_fix_daily_v1 (Fix Stock)
+   ลงไฟล์ .json เดียว เพื่อนำไป import ที่เครื่องอื่นได้
+================================================================= */
+function exportSnapshotFile() {
+  try {
+    const payload = {
+      type: 'agt_dashboard_snapshot_export',
+      exportedAt: new Date().toLocaleString('th-TH'),
+      planFg: JSON.parse(localStorage.getItem(DAILY_STORE_KEY) || '{"days":{}}'),
+      fix: JSON.parse(localStorage.getItem(FIX_DAILY_KEY) || '{"days":{}}')
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dateStr = new Date().toLocaleDateString('th-TH').replace(/\//g, '-');
+    a.href = url;
+    a.download = `agt_snapshot_export_${dateStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('เกิดข้อผิดพลาดตอนดาวน์โหลด: ' + e.message);
+    console.error(e);
+  }
+}
+
+function importSnapshotFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      if (!payload || payload.type !== 'agt_dashboard_snapshot_export') {
+        alert('❌ ไฟล์นี้ไม่ใช่ไฟล์ export ประวัติ snapshot ที่ถูกต้อง');
+        return;
+      }
+
+      // merge Plan/FG: ข้อมูลใหม่ทับวันที่ซ้ำ ส่วนวันอื่นที่มีอยู่แล้วไม่หาย
+      const curPlanFg = loadDailyStore();
+      const incomingDays = (payload.planFg && payload.planFg.days) || {};
+      Object.keys(incomingDays).forEach(k => { curPlanFg.days[k] = incomingDays[k]; });
+      saveDailyStore(curPlanFg);
+
+      // merge Fix
+      const curFix = JSON.parse(localStorage.getItem(FIX_DAILY_KEY) || '{"days":{}}');
+      const incomingFix = (payload.fix && payload.fix.days) || {};
+      Object.keys(incomingFix).forEach(k => { curFix.days[k] = incomingFix[k]; });
+      localStorage.setItem(FIX_DAILY_KEY, JSON.stringify(curFix));
+
+      updateSnapshotUI();
+      document.getElementById('importSnapshotInput').value = '';
+      alert(`✅ นำเข้าประวัติสำเร็จ\nแผนผลิต/FG: ${Object.keys(incomingDays).length} วัน\nFix Stock: ${Object.keys(incomingFix).length} วัน`);
+    } catch (err) {
+      alert('❌ อ่านไฟล์ไม่สำเร็จ: ' + err.message);
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
 }
 
 /* =================================================================
