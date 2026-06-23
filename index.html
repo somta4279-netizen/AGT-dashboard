@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGT Production — เมนูหลัก</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --line:#e4e7eb;
+    --text:#1a1f26;
+    --dim:#6b7480;
+    --accent:#e0641f;
+    --accent-dim:#fdecdf;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, 'Noto Sans Thai', sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:8vh 20px 40px;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:600;
+    margin-bottom:14px;
+  }
+  h1{
+    font-size:clamp(28px,5vw,44px);
+    font-weight:700;
+    letter-spacing:-0.01em;
+    text-align:center;
+    line-height:1.15;
+  }
+  .sub{
+    color:var(--dim);
+    font-size:15px;
+    margin-top:10px;
+    text-align:center;
+    max-width:480px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:18px;
+    width:100%;
+    max-width:760px;
+    margin-top:56px;
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:28px 26px;
+    position:relative;
+    overflow:hidden;
+    text-decoration:none;
+    color:var(--text);
+    display:flex;
+    flex-direction:column;
+    min-height:180px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.04);
+    transition:border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+  }
+  .card.live:hover{
+    border-color:var(--accent);
+    transform:translateY(-3px);
+    box-shadow:0 10px 24px rgba(224,100,31,0.12);
+  }
+  .card.soon{
+    cursor:default;
+    opacity:.6;
+  }
+  .tag{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:99px;
+    width:fit-content;
+    margin-bottom:18px;
+  }
+  .tag.live{ background:var(--accent-dim); color:var(--accent); }
+  .tag.soon{ background:#f1f2f4; color:var(--dim); }
+  .card h2{
+    font-size:20px;
+    font-weight:700;
+    margin-bottom:8px;
+  }
+  .card p{
+    font-size:13.5px;
+    color:var(--dim);
+    line-height:1.5;
+    flex:1;
+  }
+  .arrow{
+    font-size:14px;
+    color:var(--accent);
+    font-weight:600;
+    margin-top:14px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .card.soon .arrow{ color:var(--dim); }
+  footer{
+    margin-top:60px;
+    color:#aab0b8;
+    font-size:12px;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+  <div class="eyebrow">AGT · Bending Process</div>
+  <h1>เลือกระบบที่ต้องการเข้าใช้</h1>
+  <p class="sub">รวมลิงก์เข้าใช้งานแดชบอร์ดและระบบติดตามงานของแผนกพับ AGT ไว้ในที่เดียว</p>
+
+  <div class="grid">
+    <a class="card live" href="dashboard1.html">
+      <span class="tag live">ใช้งานได้</span>
+      <h2>📊 Dashboard ติดตามงานพับ AGT</h2>
+      <p>ดูแผนการผลิต ยอด Finished Good สต๊อกงานแก้ไข และสรุปยอดรายวัน/รายเดือนแบบเรียลไทม์</p>
+      <span class="arrow">เข้าใช้งาน →</span>
+    </a>
+
+    <div class="card soon">
+      <span class="tag soon">เร็วๆนี้</span>
+      <h2>➕ ระบบถัดไป</h2>
+      <p>พื้นที่นี้เผื่อไว้สำหรับเว็บหรือแดชบอร์ดตัวต่อไปของแผนก เมื่อพร้อมใช้งานจะเปิดให้กดเข้าได้จากที่นี่</p>
+      <span class="arrow">ยังไม่เปิดให้ใช้งาน</span>
+    </div>
+  </div>
+
+  <footer>AGT Production Dashboard Hub</footer>
+
+</body>
+</html>
